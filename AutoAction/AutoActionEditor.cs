@@ -167,7 +167,7 @@ namespace AutoAction
 
         public void AAOnDraw() //our rendering manager
         {
-            if (EditorLogic.fetch.editorScreen == EditorLogic.EditorScreen.Actions) //only show on actions screen
+            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions) //only show on actions screen
             {
                 if (AAWinShow)
                 {
