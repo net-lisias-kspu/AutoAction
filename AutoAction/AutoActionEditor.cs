@@ -12,6 +12,8 @@ namespace AutoAction
     public class AutoActionEditor : MonoBehaviour
     {
 
+        private bool showBasicGroups = false;
+        private bool showCustomGroups = false;
         private IButton AABtn; //toolbar button
         private bool AAWinShow = true; //show window?
         private static GUISkin AASkin;
@@ -38,9 +40,11 @@ namespace AutoAction
         public int masterActivateGroupF = 0;
         public bool masterSetThrottleYes = false;
         public int masterSetThrottle = -50; //end variables
+        ApplicationLauncherButton AAEditorButton = null; //stock toolbar button instance
 
         public void Start()
         {
+            print("AutoActions Version 1.2 loaded.");
             AAWinStyle = new GUIStyle(HighLogic.Skin.window); //make our style
             AAFldStyle = new GUIStyle(HighLogic.Skin.textField);
             AAFldStyle.fontStyle = FontStyle.Normal;
@@ -76,20 +80,77 @@ namespace AutoAction
                 {
                     if (e.MouseButton == 0) //simply show/hide window on click
                     {
-                        AAWinShow = !AAWinShow;
+                        onStockToolbarClick();
+                        
                     }
                 };
+            }
+            else
+            {
+                //AGXShow = true; //toolbar not installed, show AGX regardless
+                //now using stock toolbar as fallback
+                AAEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture("Diazo/AutoAction/AABtn", false));
             }
             ConfigNode AANode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AutoAction/AutoAction.cfg"); //load .cfg file
             AAWin.x = Convert.ToInt32(AANode.GetValue("WinX"));
             AAWin.y = Convert.ToInt32(AANode.GetValue("WinY"));
             LoadAAPartModule();
+            //ScenarioUpgradeableFacilities upgradeScen = HighLogic.CurrentGame.scenarios.OfType<ScenarioUpgradeableFacilities>().First();
+            //float edLvl = 0;
+            if (EditorDriver.editorFacility == EditorFacility.SPH) //we are in SPH, what action groups are unlocked?
+            {
+                if (GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+                {
+                    showCustomGroups = true;
+                    showBasicGroups = true;
+                }
+                else if (GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+                {
+                    showCustomGroups = false;
+                    showBasicGroups = true;
+                }
+                else
+                {
+                    showCustomGroups = false;
+                    showBasicGroups = false;
+                }
+
+            }
+            else //we are in VAB, what action groups are unlocked?
+            {
+                if (GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+                {
+                    showCustomGroups = true;
+                    showBasicGroups = true;
+                }
+                else if (GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+                {
+                    showCustomGroups = false;
+                    showBasicGroups = true;
+                }
+                else
+                {
+                    showCustomGroups = false;
+                    showBasicGroups = false;
+                }
+
+            }
         }//close Start()
 
         //public void Update()
         //{
         //    print("throttle " + masterSetThrottle + masterSetThrottleYes);
         //}
+
+        public void onStockToolbarClick()
+        {
+            AAWinShow = !AAWinShow;
+        }
+
+        public void DummyVoid()
+        {
+
+        }
 
         public void LoadAAPartModule() //load from partmodule
         {
@@ -130,6 +191,17 @@ namespace AutoAction
             }
         }
 
+        public void OnDisable()
+        {
+            if (ToolbarManager.ToolbarAvailable) //if toolbar loaded, destroy button on leaving scene
+            {
+                AABtn.Destroy();
+            }
+            else
+            {
+                ApplicationLauncher.Instance.RemoveModApplication(AAEditorButton);
+            }
+        }
 
         public void RefreshPartModules() //set values on all ModuleAutoActions on vessel
         {
@@ -167,7 +239,7 @@ namespace AutoAction
 
         public void AAOnDraw() //our rendering manager
         {
-            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions) //only show on actions screen
+            if (EditorLogic.fetch.editorScreen == EditorScreen.Actions && showBasicGroups) //only show on actions screen and if at least basic actions are unlocked
             {
                 if (AAWinShow)
                 {
@@ -275,56 +347,62 @@ namespace AutoAction
                 masterActivateSAS = !masterActivateSAS;
                 RefreshPartModules();
             }
-
-            string masterActivateGroupAString = masterActivateGroupA.ToString();
-            masterActivateGroupAString = GUI.TextField(new Rect(5, 63, 30, 20), masterActivateGroupAString, 4, AAFldStyle);
-            try
+            if (showCustomGroups) //only show custom groups if unlocked in editor
             {
-                masterActivateGroupA = Convert.ToInt32(masterActivateGroupAString); //convert string to number
+                string masterActivateGroupAString = masterActivateGroupA.ToString();
+                masterActivateGroupAString = GUI.TextField(new Rect(5, 63, 30, 20), masterActivateGroupAString, 4, AAFldStyle);
+                try
+                {
+                    masterActivateGroupA = Convert.ToInt32(masterActivateGroupAString); //convert string to number
+                }
+                catch
+                {
+                    masterActivateGroupAString = masterActivateGroupA.ToString(); //conversion failed, reset change
+                }
+                string masterActivateGroupBString = masterActivateGroupB.ToString();
+                masterActivateGroupBString = GUI.TextField(new Rect(35, 63, 30, 20), masterActivateGroupBString, 4, AAFldStyle);
+                try
+                {
+                    masterActivateGroupB = Convert.ToInt32(masterActivateGroupBString); //convert string to number
+                }
+                catch
+                {
+                    masterActivateGroupBString = masterActivateGroupB.ToString(); //conversion failed, reset change
+                }
+                string masterActivateGroupCString = masterActivateGroupC.ToString();
+                masterActivateGroupCString = GUI.TextField(new Rect(65, 63, 30, 20), masterActivateGroupCString, 4, AAFldStyle);
+                try
+                {
+                    masterActivateGroupC = Convert.ToInt32(masterActivateGroupCString); //convert string to number
+                }
+                catch
+                {
+                    masterActivateGroupCString = masterActivateGroupC.ToString(); //conversion failed, reset change
+                }
+                string masterActivateGroupDString = masterActivateGroupD.ToString();
+                masterActivateGroupDString = GUI.TextField(new Rect(95, 63, 30, 20), masterActivateGroupDString, 4, AAFldStyle);
+                try
+                {
+                    masterActivateGroupD = Convert.ToInt32(masterActivateGroupDString); //convert string to number
+                }
+                catch
+                {
+                    masterActivateGroupDString = masterActivateGroupD.ToString(); //conversion failed, reset change
+                }
+                string masterActivateGroupEString = masterActivateGroupE.ToString();
+                masterActivateGroupEString = GUI.TextField(new Rect(125, 63, 30, 20), masterActivateGroupEString, 4, AAFldStyle);
+                try
+                {
+                    masterActivateGroupE = Convert.ToInt32(masterActivateGroupEString); //convert string to number
+                }
+                catch
+                {
+                    masterActivateGroupEString = masterActivateGroupE.ToString(); //conversion failed, reset change
+                }
             }
-            catch
+            else
             {
-                masterActivateGroupAString = masterActivateGroupA.ToString(); //conversion failed, reset change
-            }
-            string masterActivateGroupBString = masterActivateGroupB.ToString();
-            masterActivateGroupBString = GUI.TextField(new Rect(35, 63, 30, 20), masterActivateGroupBString, 4, AAFldStyle);
-            try
-            {
-                masterActivateGroupB = Convert.ToInt32(masterActivateGroupBString); //convert string to number
-            }
-            catch
-            {
-                masterActivateGroupBString = masterActivateGroupB.ToString(); //conversion failed, reset change
-            }
-            string masterActivateGroupCString = masterActivateGroupC.ToString();
-            masterActivateGroupCString = GUI.TextField(new Rect(65, 63, 30, 20), masterActivateGroupCString, 4, AAFldStyle);
-            try
-            {
-                masterActivateGroupC = Convert.ToInt32(masterActivateGroupCString); //convert string to number
-            }
-            catch
-            {
-                masterActivateGroupCString = masterActivateGroupC.ToString(); //conversion failed, reset change
-            }
-            string masterActivateGroupDString = masterActivateGroupD.ToString();
-            masterActivateGroupDString = GUI.TextField(new Rect(95, 63, 30, 20), masterActivateGroupDString, 4, AAFldStyle);
-            try
-            {
-                masterActivateGroupD = Convert.ToInt32(masterActivateGroupDString); //convert string to number
-            }
-            catch
-            {
-                masterActivateGroupDString = masterActivateGroupD.ToString(); //conversion failed, reset change
-            }
-            string masterActivateGroupEString = masterActivateGroupE.ToString();
-            masterActivateGroupEString = GUI.TextField(new Rect(125, 63, 30, 20), masterActivateGroupEString, 4, AAFldStyle);
-            try
-            {
-                masterActivateGroupE = Convert.ToInt32(masterActivateGroupEString); //convert string to number
-            }
-            catch
-            {
-                masterActivateGroupEString = masterActivateGroupE.ToString(); //conversion failed, reset change
+                GUI.Label(new Rect(10, 63, 155, 20), "Custom actions not available", AALblStyle);
             }
 
             if (masterSetThrottleYes)
@@ -377,7 +455,10 @@ namespace AutoAction
             
                 GUI.DragWindow(); //window is draggable
             }//close AAWindow()
-
+        //public void Update()
+        //{
+        //    print("Upde" + BaseAction.ActionGroupsLength);
+        //}
         }
     }
 
