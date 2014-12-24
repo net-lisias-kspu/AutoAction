@@ -44,7 +44,7 @@ namespace AutoAction
 
         public void Start()
         {
-            print("AutoActions Version 1.2 loaded.");
+            print("AutoActions Version 1.2a loaded.");
             AAWinStyle = new GUIStyle(HighLogic.Skin.window); //make our style
             AAFldStyle = new GUIStyle(HighLogic.Skin.textField);
             AAFldStyle.fontStyle = FontStyle.Normal;
@@ -94,46 +94,105 @@ namespace AutoAction
             ConfigNode AANode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AutoAction/AutoAction.cfg"); //load .cfg file
             AAWin.x = Convert.ToInt32(AANode.GetValue("WinX"));
             AAWin.y = Convert.ToInt32(AANode.GetValue("WinY"));
+
+
+
             LoadAAPartModule();
             //ScenarioUpgradeableFacilities upgradeScen = HighLogic.CurrentGame.scenarios.OfType<ScenarioUpgradeableFacilities>().First();
             //float edLvl = 0;
-            if (EditorDriver.editorFacility == EditorFacility.SPH) //we are in SPH, what action groups are unlocked?
+            if (AANode.HasValue("OverrideCareer")) //are action groups unlocked?
             {
-                if (GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+                //print("b");
+                if ((string)AANode.GetValue("OverrideCareer") == "1")
                 {
+                    //print("c");
                     showCustomGroups = true;
-                    showBasicGroups = true;
-                }
-                else if (GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
-                {
-                    showCustomGroups = false;
                     showBasicGroups = true;
                 }
                 else
                 {
-                    showCustomGroups = false;
-                    showBasicGroups = false;
-                }
 
+                    if (EditorDriver.editorFacility == EditorFacility.SPH) //we are in SPH, what action groups are unlocked?
+                    {
+                        if (GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+                        {
+                            showCustomGroups = true;
+                            showBasicGroups = true;
+                        }
+                        else if (GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+                        {
+                            showCustomGroups = false;
+                            showBasicGroups = true;
+                        }
+                        else
+                        {
+                            showCustomGroups = false;
+                            showBasicGroups = false;
+                        }
+
+                    }
+                    else //we are in VAB, what action groups are unlocked?
+                    {
+                        if (GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+                        {
+                            showCustomGroups = true;
+                            showBasicGroups = true;
+                        }
+                        else if (GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+                        {
+                            showCustomGroups = false;
+                            showBasicGroups = true;
+                        }
+                        else
+                        {
+                            showCustomGroups = false;
+                            showBasicGroups = false;
+                        }
+
+                    }
+                }
             }
-            else //we are in VAB, what action groups are unlocked?
+            else
             {
-                if (GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
-                {
-                    showCustomGroups = true;
-                    showBasicGroups = true;
-                }
-                else if (GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
-                {
-                    showCustomGroups = false;
-                    showBasicGroups = true;
-                }
-                else
-                {
-                    showCustomGroups = false;
-                    showBasicGroups = false;
-                }
 
+                if (EditorDriver.editorFacility == EditorFacility.SPH) //we are in SPH, what action groups are unlocked?
+                {
+                    if (GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+                    {
+                        showCustomGroups = true;
+                        showBasicGroups = true;
+                    }
+                    else if (GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+                    {
+                        showCustomGroups = false;
+                        showBasicGroups = true;
+                    }
+                    else
+                    {
+                        showCustomGroups = false;
+                        showBasicGroups = false;
+                    }
+
+                }
+                else //we are in VAB, what action groups are unlocked?
+                {
+                    if (GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+                    {
+                        showCustomGroups = true;
+                        showBasicGroups = true;
+                    }
+                    else if (GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+                    {
+                        showCustomGroups = false;
+                        showBasicGroups = true;
+                    }
+                    else
+                    {
+                        showCustomGroups = false;
+                        showBasicGroups = false;
+                    }
+
+                }
             }
         }//close Start()
 
