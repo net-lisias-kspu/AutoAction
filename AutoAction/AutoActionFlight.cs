@@ -98,8 +98,31 @@ namespace AutoAction
                                     FlightInputHandler.state.mainThrottle = Mathf.Max(0, Mathf.Min((float)aaPM.setThrottle / 100, 1)); //set throttle, from 0 to 1
                                     //setThrottle = -50;
                                 }
+                                if (aaPM.setPrecCtrl)
+                                {
+                                    
+                                     FlightInputHandler.fetch.precisionMode = true;
+                                    foreach(Renderer rend in FlightInputHandler.fetch.inputGaugeRenderers)
+                                    {
+                                        //rend.material.color = new Color(0.976f, 0.451f, 0.024f);
+                                        rend.material.color = new Color(0.255f, 0.992f, 0.996f);
+                                    }
+
+                                }
+                                else
+                                {
+                                   
+                                    
+                                    FlightInputHandler.fetch.precisionMode = false;
+                                    foreach (Renderer rend in FlightInputHandler.fetch.inputGaugeRenderers)
+                                    {
+                                        //rend.material.color = new Color(0.255f, 0.992f, 0.996f);
+                                        rend.material.color = new Color(0.976f, 0.451f, 0.024f);
+                                    }
+                                }
                                 aaPM.hasActivated = true; //this aaPM has been processed
                                 aaPMfound = true;
+                                
                             }
                         }
                         else //aaPM has been found and processed already on this vessel, ignore any more aaPM's we find and mark them processed.
@@ -112,7 +135,8 @@ namespace AutoAction
                 aaRootPart = FlightGlobals.ActiveVessel.rootPart;
             }
         }
-        }
+            //print("test " + FlightUIController.fetch.stgPitch.Value + "|" + FlightUIController.fetch.stgPitch.pointer.renderer.material.color);
+        } //close Update()
 
         public void callActionGroup(int group)
         {

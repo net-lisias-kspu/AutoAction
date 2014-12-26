@@ -37,6 +37,8 @@ namespace AutoAction
         public int activateGroupF = 0;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
         public int setThrottle = -50;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)] //activate SAS? same as T key
+        public bool setPrecCtrl = false;
 
         //public void Start()
         //{

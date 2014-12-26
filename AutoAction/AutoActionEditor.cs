@@ -40,11 +40,13 @@ namespace AutoAction
         public int masterActivateGroupF = 0;
         public bool masterSetThrottleYes = false;
         public int masterSetThrottle = -50; //end variables
+        public bool masterSetPrecCtrl = false; //precise control?
         ApplicationLauncherButton AAEditorButton = null; //stock toolbar button instance
+        ConfigNode AANode;
 
         public void Start()
         {
-            print("AutoActions Version 1.2a loaded.");
+            print("AutoActions Version 1.3 loaded.");
             AAWinStyle = new GUIStyle(HighLogic.Skin.window); //make our style
             AAFldStyle = new GUIStyle(HighLogic.Skin.textField);
             AAFldStyle.fontStyle = FontStyle.Normal;
@@ -81,7 +83,7 @@ namespace AutoAction
                     if (e.MouseButton == 0) //simply show/hide window on click
                     {
                         onStockToolbarClick();
-                        
+
                     }
                 };
             }
@@ -91,7 +93,7 @@ namespace AutoAction
                 //now using stock toolbar as fallback
                 AAEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture("Diazo/AutoAction/AABtn", false));
             }
-            ConfigNode AANode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AutoAction/AutoAction.cfg"); //load .cfg file
+            AANode = ConfigNode.Load(KSPUtil.ApplicationRootPath + "GameData/Diazo/AutoAction/AutoAction.cfg"); //load .cfg file
             AAWin.x = Convert.ToInt32(AANode.GetValue("WinX"));
             AAWin.y = Convert.ToInt32(AANode.GetValue("WinY"));
 
@@ -218,7 +220,7 @@ namespace AutoAction
                 foreach (Part p in EditorLogic.SortedShipList)
                 {
                     foreach (ModuleAutoAction pmAA in p.Modules.OfType<ModuleAutoAction>())
-                    { 
+                    {
                         masterActivateAbort = pmAA.activateAbort;
                         masterActivateGear = pmAA.activateGear;
                         masterActivateLights = pmAA.activateLights;
@@ -241,6 +243,7 @@ namespace AutoAction
                             masterSetThrottle = -50;
                             masterSetThrottleYes = false;
                         }
+                        masterSetPrecCtrl = pmAA.setPrecCtrl;
                     }
                 }
             }
@@ -274,12 +277,55 @@ namespace AutoAction
                     pmAA.activateBrakes = masterActivateBrakes;
                     pmAA.activateRCS = masterActivateRCS;
                     pmAA.activateSAS = masterActivateSAS;
-                    pmAA.activateGroupA = masterActivateGroupA;
-                    pmAA.activateGroupB = masterActivateGroupB;
-                    pmAA.activateGroupC = masterActivateGroupC;
-                    pmAA.activateGroupD = masterActivateGroupD;
-                    pmAA.activateGroupE = masterActivateGroupE;
-                    pmAA.activateGroupF = masterActivateGroupF;
+                    if (masterActivateGroupA == -200)
+                    {
+                        pmAA.activateGroupA = 0;
+                    }
+                    else
+                    {
+                        pmAA.activateGroupA = masterActivateGroupA;
+                    }
+                    if (masterActivateGroupB == -200)
+                    {
+                        pmAA.activateGroupB = 0;
+                    }
+                    else
+                    {
+                        pmAA.activateGroupB = masterActivateGroupB;
+                    }
+                    if (masterActivateGroupC == -200)
+                    {
+                        pmAA.activateGroupC = 0;
+                    }
+                    else
+                    {
+                        pmAA.activateGroupC = masterActivateGroupC;
+                    }
+                    if (masterActivateGroupD == -200)
+                    {
+                        pmAA.activateGroupD = 0;
+                    }
+                    else
+                    {
+                        pmAA.activateGroupD = masterActivateGroupD;
+                    }
+                    if (masterActivateGroupE == -200)
+                    {
+                        pmAA.activateGroupE = 0;
+                    }
+                    else
+                    {
+                        pmAA.activateGroupE = masterActivateGroupE;
+                    }
+                    if (masterActivateGroupF == -200)
+                    {
+                        pmAA.activateGroupF = 0;
+                    }
+                    else
+                    {
+                        pmAA.activateGroupF = masterActivateGroupF;
+                    }
+                    
                     if (masterSetThrottleYes)
                     {
                         pmAA.setThrottle = masterSetThrottle;
@@ -288,10 +334,18 @@ namespace AutoAction
                     {
                         pmAA.setThrottle = -50;
                     }
+                    pmAA.setPrecCtrl = masterSetPrecCtrl;
                 }
             }
-            ConfigNode AANode = new ConfigNode();
+            if (AANode.HasValue("WinX"))
+            {
+                AANode.RemoveValue("WinX");
+            }
             AANode.AddValue("WinX", AAWin.x.ToString());
+            if (AANode.HasValue("WinY"))
+            {
+                AANode.RemoveValue("WinY");
+            }
             AANode.AddValue("WinY", AAWin.y.ToString());
             AANode.Save(KSPUtil.ApplicationRootPath + "GameData/Diazo/AutoAction/AutoAction.cfg");//same^
         }//end RefreshPartModules()
@@ -309,8 +363,8 @@ namespace AutoAction
 
         public void AAWindow(int WindowID)
         {
-            
-            
+
+
             if (masterActivateAbort)
             {
                 AABtnStyle.normal.background = ButtonTextureGreen;
@@ -408,51 +462,81 @@ namespace AutoAction
             }
             if (showCustomGroups) //only show custom groups if unlocked in editor
             {
-                string masterActivateGroupAString = masterActivateGroupA.ToString();
+                string masterActivateGroupAString = cvertToString(masterActivateGroupA);
                 masterActivateGroupAString = GUI.TextField(new Rect(5, 63, 30, 20), masterActivateGroupAString, 4, AAFldStyle);
                 try
                 {
-                    masterActivateGroupA = Convert.ToInt32(masterActivateGroupAString); //convert string to number
+                    int tempA = cvertToNum(masterActivateGroupAString); //convert string to number
+                    if (tempA != masterActivateGroupA)
+                    {
+                        masterActivateGroupA = tempA;
+                        RefreshPartModules();
+                    }
+                     
                 }
                 catch
                 {
                     masterActivateGroupAString = masterActivateGroupA.ToString(); //conversion failed, reset change
                 }
-                string masterActivateGroupBString = masterActivateGroupB.ToString();
+                string masterActivateGroupBString = cvertToString(masterActivateGroupB);
                 masterActivateGroupBString = GUI.TextField(new Rect(35, 63, 30, 20), masterActivateGroupBString, 4, AAFldStyle);
                 try
                 {
-                    masterActivateGroupB = Convert.ToInt32(masterActivateGroupBString); //convert string to number
+                    int tempB = cvertToNum(masterActivateGroupBString); //convert string to number
+                    if (tempB != masterActivateGroupB)
+                    {
+                        masterActivateGroupB = tempB; 
+                        RefreshPartModules();
+                    }
+                    
                 }
                 catch
                 {
                     masterActivateGroupBString = masterActivateGroupB.ToString(); //conversion failed, reset change
                 }
-                string masterActivateGroupCString = masterActivateGroupC.ToString();
+                string masterActivateGroupCString = cvertToString(masterActivateGroupC);
                 masterActivateGroupCString = GUI.TextField(new Rect(65, 63, 30, 20), masterActivateGroupCString, 4, AAFldStyle);
                 try
                 {
-                    masterActivateGroupC = Convert.ToInt32(masterActivateGroupCString); //convert string to number
+                    int tempC = cvertToNum(masterActivateGroupCString); //convert string to number
+                    if (tempC != masterActivateGroupC)
+                    {
+                        masterActivateGroupC = tempC;
+                        RefreshPartModules();
+                    }
+                     
                 }
                 catch
                 {
                     masterActivateGroupCString = masterActivateGroupC.ToString(); //conversion failed, reset change
                 }
-                string masterActivateGroupDString = masterActivateGroupD.ToString();
+                string masterActivateGroupDString = cvertToString(masterActivateGroupD);
                 masterActivateGroupDString = GUI.TextField(new Rect(95, 63, 30, 20), masterActivateGroupDString, 4, AAFldStyle);
                 try
                 {
-                    masterActivateGroupD = Convert.ToInt32(masterActivateGroupDString); //convert string to number
+                    int tempD = cvertToNum(masterActivateGroupDString); //convert string to number
+                    if (tempD != masterActivateGroupD)
+                    {
+                        masterActivateGroupD = tempD; 
+                        RefreshPartModules();
+                    }
+                   
                 }
                 catch
                 {
                     masterActivateGroupDString = masterActivateGroupD.ToString(); //conversion failed, reset change
                 }
-                string masterActivateGroupEString = masterActivateGroupE.ToString();
+                string masterActivateGroupEString = cvertToString(masterActivateGroupE);
                 masterActivateGroupEString = GUI.TextField(new Rect(125, 63, 30, 20), masterActivateGroupEString, 4, AAFldStyle);
                 try
                 {
-                    masterActivateGroupE = Convert.ToInt32(masterActivateGroupEString); //convert string to number
+                    int tempE = cvertToNum(masterActivateGroupEString); //convert string to number
+                    if (tempE != masterActivateGroupE)
+                    {
+                        masterActivateGroupE = tempE;
+                        RefreshPartModules();
+                    }
+                     
                 }
                 catch
                 {
@@ -474,10 +558,10 @@ namespace AutoAction
                 AABtnStyle.normal.background = ButtonTextureRed;
                 AABtnStyle.hover.background = ButtonTextureRed;
             }
-            if (GUI.Button(new Rect(5, 85, 80, 20), "Set throttle:", AABtnStyle))
+            if (GUI.Button(new Rect(5, 85, 50, 20), "Throttle:", AABtnStyle))
             {
                 masterSetThrottleYes = !masterSetThrottleYes;
-                if(masterSetThrottleYes)
+                if (masterSetThrottleYes)
                 {
                     masterSetThrottle = 50;
                 }
@@ -488,36 +572,75 @@ namespace AutoAction
                 RefreshPartModules();
             }
 
-            if(!masterSetThrottleYes)
+            if (!masterSetThrottleYes)
             {
-                GUI.Label(new Rect(90, 85, 40, 20), "No", HighLogic.Skin.label);
+                GUI.Label(new Rect(68, 85, 40, 20), "No", HighLogic.Skin.label);
             }
             else
             {
                 string masterSetThrottleString = masterSetThrottle.ToString();
-                masterSetThrottleString = GUI.TextField(new Rect(90, 85, 30, 20), masterSetThrottleString, 4, AAFldStyle);
+                masterSetThrottleString = GUI.TextField(new Rect(60, 85, 30, 20), masterSetThrottleString, 4, AAFldStyle);
                 try
                 {
                     masterSetThrottle = Convert.ToInt32(masterSetThrottleString); //convert string to number
-                    RefreshPartModules(); 
+                    RefreshPartModules();
                 }
                 catch
                 {
                     masterSetThrottleString = masterSetThrottle.ToString(); //conversion failed, reset change
                 }
-                GUI.Label(new Rect(122, 70, 10, 20), "%", HighLogic.Skin.label);
+                GUI.Label(new Rect(92, 70, 10, 20), "%", HighLogic.Skin.label);
+            }
+
+            if (masterSetPrecCtrl)
+            {
+                AABtnStyle.normal.background = ButtonTextureGreen;
+                AABtnStyle.hover.background = ButtonTextureGreen;
+            }
+            else
+            {
+                AABtnStyle.normal.background = ButtonTextureRed;
+                AABtnStyle.hover.background = ButtonTextureRed;
+            }
+            if (GUI.Button(new Rect(110, 85, 40, 20), "PCtrl", AABtnStyle))
+            {
+                masterSetPrecCtrl = !masterSetPrecCtrl;
+                
+                RefreshPartModules();
             }
 
 
             AABtnStyle.normal.background = ButtonTextureGray;
             AABtnStyle.hover.background = ButtonTextureGray;
-            
-                GUI.DragWindow(); //window is draggable
-            }//close AAWindow()
+
+            GUI.DragWindow(); //window is draggable
+        }//close AAWindow()
         //public void Update()
         //{
-        //    print("Upde" + BaseAction.ActionGroupsLength);
+        //    print("Upde" + masterActivateGroupA);
         //}
+        public string cvertToString(int num)
+        {
+            if(num == -200)
+            {
+                return "";
+            }
+            else
+            {
+                return num.ToString();
+            }
         }
+        public int cvertToNum(string str)
+        {
+            if(str == "")
+            {
+                return -200;
+            }
+            else 
+            {
+                return Convert.ToInt32(str);
+            }
+        }
+    }
     }
 
