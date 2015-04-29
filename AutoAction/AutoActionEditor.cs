@@ -46,7 +46,8 @@ namespace AutoAction
 
         public void Start()
         {
-            print("AutoActions Version 1.3 loaded.");
+            print("AutoActions Version 1.4 loaded.");
+            GameEvents.onEditorLoad.Add(OnShipLoad);
             AAWinStyle = new GUIStyle(HighLogic.Skin.window); //make our style
             AAFldStyle = new GUIStyle(HighLogic.Skin.textField);
             AAFldStyle.fontStyle = FontStyle.Normal;
@@ -262,6 +263,19 @@ namespace AutoAction
             else
             {
                 ApplicationLauncher.Instance.RemoveModApplication(AAEditorButton);
+            }
+            GameEvents.onEditorLoad.Remove(OnShipLoad);
+        }
+
+        public void OnShipLoad(ShipConstruct ship, CraftBrowser.LoadType loadType)
+        {
+            if (loadType == CraftBrowser.LoadType.Normal)
+            {
+                LoadAAPartModule();
+            }
+            else
+            {
+                Debug.Log("AutoAction Ship Load of type MERGE");
             }
         }
 
