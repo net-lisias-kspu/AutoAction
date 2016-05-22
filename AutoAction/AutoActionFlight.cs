@@ -81,10 +81,11 @@ namespace AutoAction
 											FlightInputHandler.state.mainThrottle = Mathf.Max(0, Mathf.Min((float)throttle / 100, 1));
 
 										FlightInputHandler.fetch.precisionMode = aaPM.SetPrecCtrl ?? defaultSetPrecCtrl;
-										foreach(Renderer rend in FlightInputHandler.fetch.inputGaugeRenderers)
-											rend.material.color = aaPM.SetPrecCtrl ?? defaultSetPrecCtrl
-												? new Color(0.255f, 0.992f, 0.996f)
-												: new Color(0.976f, 0.451f, 0.024f);
+										// todo: Find a way to change the gauge color!
+										//foreach(Renderer rend in FlightInputHandler.fetch.inputGaugeRenderers)
+										//	rend.material.color = aaPM.SetPrecCtrl ?? defaultSetPrecCtrl
+										//		? XKCDColors.BrightCyan
+										//		: XKCDColors.Orange;
 
 										aaPM.hasActivated = true; //this aaPM has been processed
 										aaPMfound = true;

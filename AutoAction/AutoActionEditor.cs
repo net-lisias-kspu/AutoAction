@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.IO;
+using KSP.UI.Screens;
+using static KSP.UI.Screens.CraftBrowserDialog;
 
 namespace AutoAction
 {
@@ -59,13 +61,17 @@ namespace AutoAction
 		ApplicationLauncherButton AAEditorButton = null; //stock toolbar button instance
 		ConfigNode AANode;
 
+		public void OnGUI()
+		{
+			AAOnDraw();
+		}
+
 		public void Start()
 		{
-			print("AutoActions Version 1.5f loaded.");
+			print("AutoActions Version 1.6f loaded.");
 			GameEvents.onEditorLoad.Add(OnShipLoad);
 			AAWinStyle = new GUIStyle(HighLogic.Skin.window); //make our style
 			AAFldStyle = new GUIStyle(HighLogic.Skin.textField) { fontStyle = FontStyle.Normal };
-			RenderingManager.AddToPostDrawQueue(0, AAOnDraw); //GUI window hook
 			//load our button textures
 			ButtonTextureGray.LoadImage(File.ReadAllBytes(FullModFolderPath + "ButtonTexture.png"));
 			ButtonTextureGray.Apply();
@@ -105,7 +111,7 @@ namespace AutoAction
 			{
 				//AGXShow = true; //toolbar not installed, show AGX regardless
 				//now using stock toolbar as fallback
-				AAEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture(ModFolderPath + "AABtn", false));
+				//AAEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture(ModFolderPath + "AABtn", false));
 			}
 
 			AANode = ConfigNode.Load(FullModFolderPath + "AutoAction.cfg"); //load .cfg file
@@ -137,12 +143,12 @@ namespace AutoAction
 
 					if(EditorDriver.editorFacility == EditorFacility.SPH) //we are in SPH, what action groups are unlocked?
 					{
-						if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+						if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), false))
 						{
 							showCustomGroups = true;
 							showBasicGroups = true;
 						}
-						else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+						else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), false))
 						{
 							showCustomGroups = false;
 							showBasicGroups = true;
@@ -156,12 +162,12 @@ namespace AutoAction
 					}
 					else //we are in VAB, what action groups are unlocked?
 					{
-						if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+						if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding), true))
 						{
 							showCustomGroups = true;
 							showBasicGroups = true;
 						}
-						else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+						else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding), true))
 						{
 							showCustomGroups = false;
 							showBasicGroups = true;
@@ -180,12 +186,12 @@ namespace AutoAction
 
 				if(EditorDriver.editorFacility == EditorFacility.SPH) //we are in SPH, what action groups are unlocked?
 				{
-					if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+					if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), false))
 					{
 						showCustomGroups = true;
 						showBasicGroups = true;
 					}
-					else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar)))
+					else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), false))
 					{
 						showCustomGroups = false;
 						showBasicGroups = true;
@@ -199,12 +205,12 @@ namespace AutoAction
 				}
 				else //we are in VAB, what action groups are unlocked?
 				{
-					if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+					if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding), true))
 					{
 						showCustomGroups = true;
 						showBasicGroups = true;
 					}
-					else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding)))
+					else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding), true))
 					{
 						showCustomGroups = false;
 						showBasicGroups = true;
@@ -287,9 +293,9 @@ namespace AutoAction
 			GameEvents.onEditorLoad.Remove(OnShipLoad);
 		}
 
-		public void OnShipLoad(ShipConstruct ship, CraftBrowser.LoadType loadType)
+		public void OnShipLoad(ShipConstruct ship, LoadType loadType)
 		{
-			if(loadType == CraftBrowser.LoadType.Normal)
+			if(loadType == LoadType.Normal)
 			{
 				LoadAAPartModule();
 			}
