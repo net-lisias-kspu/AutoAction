@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.IO;
+using UnityEngine.UI;
 
 
 namespace AutoAction
@@ -25,17 +26,23 @@ namespace AutoAction
 
 		public Part aaRootPart = null;
 
+		FlightInputHandler flightHandler;
+
 		public void Start()
 		{
+			var facilityPrefix = ShipConstruction.ShipType == EditorFacility.SPH ? "SPH" : "VAB";
+
 			var aaNode = ConfigNode.Load(FullModFolderPath + "AutoAction.cfg"); //load .cfg file
-			defaultActivateAbort = aaNode.GetValue("activateAbort") == "On";
-			defaultActivateGear = aaNode.GetValue("activateGear") != "Off";
-			defaultActivateLights = aaNode.GetValue("activateLights") == "On";
-			defaultActivateBrakes = aaNode.GetValue("activateBrakes") == "On";
-			defaultActivateRCS = aaNode.GetValue("activateRCS") == "On";
-			defaultActivateSAS = aaNode.GetValue("activateSAS") == "On";
-			int.TryParse(aaNode.GetValue("setThrottle"), out defaultSetThrottle);
-			defaultSetPrecCtrl = aaNode.GetValue("setPrecCtrl") == "On";
+			defaultActivateAbort = aaNode.GetValue(facilityPrefix + "activateAbort") == "On";
+			defaultActivateGear = aaNode.GetValue(facilityPrefix + "activateGear") != "Off";
+			defaultActivateLights = aaNode.GetValue(facilityPrefix + "activateLights") == "On";
+			defaultActivateBrakes = aaNode.GetValue(facilityPrefix + "activateBrakes") == "On";
+			defaultActivateRCS = aaNode.GetValue(facilityPrefix + "activateRCS") == "On";
+			defaultActivateSAS = aaNode.GetValue(facilityPrefix + "activateSAS") == "On";
+			int.TryParse(aaNode.GetValue(facilityPrefix + "setThrottle"), out defaultSetThrottle);
+			defaultSetPrecCtrl = aaNode.GetValue(facilityPrefix + "setPrecCtrl") == "On";
+
+			flightHandler = FlightInputHandler.fetch;
 		}
 
 		public void Update()
@@ -80,12 +87,14 @@ namespace AutoAction
 										if(throttle >= 0)
 											FlightInputHandler.state.mainThrottle = Mathf.Max(0, Mathf.Min((float)throttle / 100, 1));
 
-										FlightInputHandler.fetch.precisionMode = aaPM.SetPrecCtrl ?? defaultSetPrecCtrl;
-										// todo: Find a way to change the gauge color!
-										//foreach(Renderer rend in FlightInputHandler.fetch.inputGaugeRenderers)
-										//	rend.material.color = aaPM.SetPrecCtrl ?? defaultSetPrecCtrl
-										//		? XKCDColors.BrightCyan
-										//		: XKCDColors.Orange;
+										flightHandler.precisionMode = aaPM.SetPrecCtrl ?? defaultSetPrecCtrl;
+										// change the gauge color
+										var gauges = FindObjectOfType<KSP.UI.Screens.Flight.LinearControlGauges>();
+										if(gauges != null)
+											foreach(var image in gauges.inputGaugeImages)
+												image.color = (aaPM.SetPrecCtrl ?? defaultSetPrecCtrl)
+													? XKCDColors.BrightCyan
+													: XKCDColors.Orange;
 
 										aaPM.hasActivated = true; //this aaPM has been processed
 										aaPMfound = true;

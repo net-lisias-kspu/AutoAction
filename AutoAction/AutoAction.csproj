@@ -63,7 +63,7 @@
     <Compile Include="AGXInterface.cs" />
     <Compile Include="AutoActionEditor.cs" />
     <Compile Include="AutoActionFlight.cs" />
-    <Compile Include="Button.cs" />
+    <Compile Include="ToolbarWrapper.cs" />
     <Compile Include="ModuleAutoAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

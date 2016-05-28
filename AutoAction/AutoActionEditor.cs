@@ -32,6 +32,7 @@ namespace AutoAction
 		Texture2D ButtonTextureRed = new Texture2D(64, 64); //button textures
 		Texture2D ButtonTextureGreen = new Texture2D(64, 64);
 		Texture2D ButtonTextureGray = new Texture2D(64, 64);
+		string facilityPrefix;
 
 		public bool defaultActivateAbort = false;
 		public bool defaultActivateGear = true;
@@ -68,7 +69,7 @@ namespace AutoAction
 
 		public void Start()
 		{
-			print("AutoActions Version 1.6f loaded.");
+			print("AutoActions Version 1.6.2f loaded.");
 			GameEvents.onEditorLoad.Add(OnShipLoad);
 			AAWinStyle = new GUIStyle(HighLogic.Skin.window); //make our style
 			AAFldStyle = new GUIStyle(HighLogic.Skin.textField) { fontStyle = FontStyle.Normal };
@@ -101,9 +102,8 @@ namespace AutoAction
 				AABtn.OnClick += (e) =>
 				{
 					if(e.MouseButton == 0) //simply show/hide window on click
-									{
+					{
 						onStockToolbarClick();
-
 					}
 				};
 			}
@@ -111,20 +111,22 @@ namespace AutoAction
 			{
 				//AGXShow = true; //toolbar not installed, show AGX regardless
 				//now using stock toolbar as fallback
-				//AAEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture(ModFolderPath + "AABtn", false));
+				AAEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture(ModFolderPath + "AABtn", false));
 			}
+
+			facilityPrefix = EditorDriver.editorFacility == EditorFacility.SPH ? "SPH" : "VAB";
 
 			AANode = ConfigNode.Load(FullModFolderPath + "AutoAction.cfg"); //load .cfg file
 			AAWin.x = Convert.ToInt32(AANode.GetValue("WinX"));
 			AAWin.y = Convert.ToInt32(AANode.GetValue("WinY"));
-			defaultActivateAbort = AANode.GetValue("activateAbort") == "On";
-			defaultActivateGear = AANode.GetValue("activateGear") != "Off";
-			defaultActivateLights = AANode.GetValue("activateLights") == "On";
-			defaultActivateBrakes = AANode.GetValue("activateBrakes") == "On";
-			defaultActivateRCS = AANode.GetValue("activateRCS") == "On";
-			defaultActivateSAS = AANode.GetValue("activateSAS") == "On";
-			int.TryParse(AANode.GetValue("setThrottle"), out defaultSetThrottle);
-			defaultSetPrecCtrl = AANode.GetValue("setPrecCtrl") == "On";
+			defaultActivateAbort = AANode.GetValue(facilityPrefix + "activateAbort") == "On";
+			defaultActivateGear = AANode.GetValue(facilityPrefix + "activateGear") != "Off";
+			defaultActivateLights = AANode.GetValue(facilityPrefix + "activateLights") == "On";
+			defaultActivateBrakes = AANode.GetValue(facilityPrefix + "activateBrakes") == "On";
+			defaultActivateRCS = AANode.GetValue(facilityPrefix + "activateRCS") == "On";
+			defaultActivateSAS = AANode.GetValue(facilityPrefix + "activateSAS") == "On";
+			int.TryParse(AANode.GetValue(facilityPrefix + "setThrottle"), out defaultSetThrottle);
+			defaultSetPrecCtrl = AANode.GetValue(facilityPrefix + "setPrecCtrl") == "On";
 
 			LoadAAPartModule();
 			//ScenarioUpgradeableFacilities upgradeScen = HighLogic.CurrentGame.scenarios.OfType<ScenarioUpgradeableFacilities>().First();
@@ -378,14 +380,14 @@ namespace AutoAction
 				}
 			}
 
-			AANode.SetValue("activateAbort", defaultActivateAbort ? "On" : "Off", true);
-			AANode.SetValue("activateGear", defaultActivateGear ? "On" : "Off", true);
-			AANode.SetValue("activateLights", defaultActivateLights ? "On" : "Off", true);
-			AANode.SetValue("activateBrakes", defaultActivateBrakes ? "On" : "Off", true);
-			AANode.SetValue("activateRCS", defaultActivateRCS ? "On" : "Off", true);
-			AANode.SetValue("activateSAS", defaultActivateSAS ? "On" : "Off", true);
-			AANode.SetValue("setThrottle", defaultSetThrottle.ToString(), true);
-			AANode.SetValue("setPrecCtrl", defaultSetPrecCtrl ? "On" : "Off", true);
+			AANode.SetValue(facilityPrefix + "activateAbort", defaultActivateAbort ? "On" : "Off", true);
+			AANode.SetValue(facilityPrefix + "activateGear", defaultActivateGear ? "On" : "Off", true);
+			AANode.SetValue(facilityPrefix + "activateLights", defaultActivateLights ? "On" : "Off", true);
+			AANode.SetValue(facilityPrefix + "activateBrakes", defaultActivateBrakes ? "On" : "Off", true);
+			AANode.SetValue(facilityPrefix + "activateRCS", defaultActivateRCS ? "On" : "Off", true);
+			AANode.SetValue(facilityPrefix + "activateSAS", defaultActivateSAS ? "On" : "Off", true);
+			AANode.SetValue(facilityPrefix + "setThrottle", defaultSetThrottle.ToString(), true);
+			AANode.SetValue(facilityPrefix + "setPrecCtrl", defaultSetPrecCtrl ? "On" : "Off", true);
 
 			AANode.SetValue("WinX", AAWin.x.ToString(), true);
 			AANode.SetValue("WinY", AAWin.y.ToString(), true);
@@ -586,7 +588,7 @@ namespace AutoAction
 
 			// Default settings
 
-			GUI.Label(new Rect(5, 128, 155, 20), "Default settings", HighLogic.Skin.label);
+			GUI.Label(new Rect(5, 128, 155, 20), facilityPrefix + " defaults", HighLogic.Skin.label);
 
 			AABtnStyle.normal.background = AABtnStyle.hover.background = ButtonTextureGray;
 			if(GUI.Button(new Rect(110, 130, 30, 18), isWindowExpanded ? "▲" : "▼", AABtnStyle))

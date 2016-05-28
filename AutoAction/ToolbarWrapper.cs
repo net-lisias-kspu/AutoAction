@@ -1,16 +1,16 @@
 ﻿/*
-Copyright (c) 2013-2014, Maik Schreiber
+Copyright (c) 2013-2016, Maik Schreiber
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
+   list of conditions and the following disclaimer.
 
 2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,13 +27,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 
 
 // TODO: Change to your plugin's namespace here.
 namespace AutoAction
 {
+
+
 
 	/**********************************************************\
 	*          --- DO NOT EDIT BELOW THIS COMMENT ---          *
@@ -46,6 +47,8 @@ namespace AutoAction
 	*                                                          *
 	*          --- DO NOT EDIT BELOW THIS COMMENT ---          *
 	\**********************************************************/
+
+
 
 	/// <summary>
 	/// The global tool bar manager.
@@ -272,7 +275,7 @@ namespace AutoAction
 		/// <code>
 		/// IButton button = ...
 		/// button.OnClick += (e) => {
-		/// Debug.Log("button clicked, mouseButton: " + e.MouseButton);
+		///     Debug.Log("button clicked, mouseButton: " + e.MouseButton);
 		/// };
 		/// </code>
 		/// </example>
@@ -285,7 +288,7 @@ namespace AutoAction
 		/// <code>
 		/// IButton button = ...
 		/// button.OnMouseEnter += (e) => {
-		/// Debug.Log("mouse entered button");
+		///     Debug.Log("mouse entered button");
 		/// };
 		/// </code>
 		/// </example>
@@ -298,7 +301,7 @@ namespace AutoAction
 		/// <code>
 		/// IButton button = ...
 		/// button.OnMouseLeave += (e) => {
-		/// Debug.Log("mouse left button");
+		///     Debug.Log("mouse left button");
 		/// };
 		/// </code>
 		/// </example>
@@ -427,14 +430,12 @@ namespace AutoAction
 	/// <example>
 	/// <code>
 	/// IButton button = ...
-	/// button.Visibility = new GameScenesVisibility(GameScenes.EDITOR, GameScenes.SPH);
+	/// button.Visibility = new GameScenesVisibility(GameScenes.EDITOR, GameScenes.FLIGHT);
 	/// </code>
 	/// </example>
 	/// <seealso cref="IButton.Visibility"/>
 	public class GameScenesVisibility : IVisibility
 	{
-		private GameScenes[] gameScenes;
-
 		public bool Visible
 		{
 			get
@@ -451,7 +452,6 @@ namespace AutoAction
 			Type gameScenesVisibilityType = ToolbarTypes.getType("Toolbar.GameScenesVisibility");
 			realGameScenesVisibility = Activator.CreateInstance(gameScenesVisibilityType, new object[] { gameScenes });
 			visibleProperty = ToolbarTypes.getProperty(gameScenesVisibilityType, "Visible");
-			this.gameScenes = gameScenes;
 		}
 	}
 
@@ -712,9 +712,9 @@ namespace AutoAction
 				if(value != null)
 				{
 					functionDrawable = Activator.CreateInstance(types.functionDrawableType, new object[] {
-new Action(() => value.Update()),
-new Func<Vector2, Vector2>((pos) => value.Draw(pos))
-});
+						new Action(() => value.Update()),
+						new Func<Vector2, Vector2>((pos) => value.Draw(pos))
+					});
 				}
 				types.button.drawableProperty.SetValue(realButton, functionDrawable, null);
 				drawable_ = value;
@@ -792,7 +792,7 @@ new Func<Vector2, Vector2>((pos) => value.Draw(pos))
 	public partial class MouseEnterEvent : MouseMoveEvent
 	{
 		internal MouseEnterEvent(IButton button)
-				: base(button)
+			: base(button)
 		{
 		}
 	}
@@ -800,7 +800,7 @@ new Func<Vector2, Vector2>((pos) => value.Draw(pos))
 	public partial class MouseLeaveEvent : MouseMoveEvent
 	{
 		internal MouseLeaveEvent(IButton button)
-				: base(button)
+			: base(button)
 		{
 		}
 	}
@@ -825,8 +825,8 @@ new Func<Vector2, Vector2>((pos) => value.Draw(pos))
 		internal static Type getType(string name)
 		{
 			return AssemblyLoader.loadedAssemblies
-			.SelectMany(a => a.assembly.GetExportedTypes())
-			.SingleOrDefault(t => t.FullName == name);
+				.SelectMany(a => a.assembly.GetExportedTypes())
+				.SingleOrDefault(t => t.FullName == name);
 		}
 
 		internal static PropertyInfo getProperty(Type type, string name)
