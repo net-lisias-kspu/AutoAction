@@ -9,7 +9,7 @@ namespace AutoAction
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
 	public class AutoActionFlight : MonoBehaviour
 	{
-		static readonly string ModFolderPath = "Diazo/AutoAction/";
+		static readonly string ModFolderPath = "AutoAction/";
 		static readonly string FullModFolderPath = KSPUtil.ApplicationRootPath + "GameData/" + ModFolderPath;
 
 		public bool defaultActivateAbort = false;
@@ -29,7 +29,7 @@ namespace AutoAction
 		{
 			var facilityPrefix = ShipConstruction.ShipType == EditorFacility.SPH ? "SPH" : "VAB";
 
-			var aaNode = ConfigNode.Load(FullModFolderPath + "AutoAction.cfg"); //load .cfg file
+			var aaNode = ConfigNode.Load(FullModFolderPath + "AutoAction.settings"); //load .settings file
 			defaultActivateAbort = aaNode.GetValue(facilityPrefix + "activateAbort") == "On";
 			defaultActivateGear = aaNode.GetValue(facilityPrefix + "activateGear") != "Off";
 			defaultActivateLights = aaNode.GetValue(facilityPrefix + "activateLights") == "On";

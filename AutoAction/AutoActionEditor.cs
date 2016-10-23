@@ -12,7 +12,7 @@ namespace AutoAction
 	[KSPAddon(KSPAddon.Startup.EditorAny, false)]
 	public class AutoActionEditor : MonoBehaviour
 	{
-		static readonly string ModFolderPath = "Diazo/AutoAction/";
+		static readonly string ModFolderPath = "AutoAction/";
 		static readonly string FullModFolderPath = KSPUtil.ApplicationRootPath + "GameData/" + ModFolderPath;
 
 		private bool showBasicGroups = false;
@@ -115,7 +115,7 @@ namespace AutoAction
 
 			facilityPrefix = EditorDriver.editorFacility == EditorFacility.SPH ? "SPH" : "VAB";
 
-			AANode = ConfigNode.Load(FullModFolderPath + "AutoAction.cfg"); //load .cfg file
+			AANode = ConfigNode.Load(FullModFolderPath + "AutoAction.settings"); //load .settings file
 			AAWin.x = Convert.ToInt32(AANode.GetValue("WinX"));
 			AAWin.y = Convert.ToInt32(AANode.GetValue("WinY"));
 			defaultActivateAbort = AANode.GetValue(facilityPrefix + "activateAbort") == "On";
@@ -391,7 +391,7 @@ namespace AutoAction
 			AANode.SetValue("WinX", AAWin.x.ToString(), true);
 			AANode.SetValue("WinY", AAWin.y.ToString(), true);
 
-			AANode.Save(FullModFolderPath + "AutoAction.cfg");//same^
+			AANode.Save(FullModFolderPath + "AutoAction.settings");//same^
 		}//end RefreshPartModules()
 
 		public void AAOnDraw() //our rendering manager
