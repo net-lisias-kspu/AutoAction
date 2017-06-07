@@ -5,24 +5,33 @@ using System.Reflection;
 
 namespace AutoAction
 {
-	class AGXInterface
+	static class AgxInterface
 	{
-		public static bool AGExtInstalled()
+		public static bool IsAgxInstalled()
 		{
 			try
 			{
-				Type calledType = Type.GetType("ActionGroupsExtended.AGExtExternal, AGExt");
-				return (bool)calledType.InvokeMember("AGXInstalled", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, null);
+				var agxType = Type.GetType(AgxTypeName);
+				return
+					agxType != null &&
+					(bool)agxType.InvokeMember("AGXInstalled", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, null);
 			}
-			catch //if AGX not installed, above throws a null ref error, catch it
+			catch
 			{
 				return false;
 			}
 		}
-		public static void AGExtToggleGroup(int group)
+
+		public static void AgxToggleGroup(int group)
 		{
-			Type calledType = Type.GetType("ActionGroupsExtended.AGExtExternal, AGExt");
-			calledType.InvokeMember("AGXToggleGroup", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new System.Object[] { group });
+			try
+			{
+				var agxType = Type.GetType(AgxTypeName);
+				agxType?.InvokeMember("AGXToggleGroup", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new object[] { group });
+			}
+			catch { }
 		}
+
+		const string AgxTypeName = "ActionGroupsExtended.AGExtExternal, AGExt";
 	}
 }

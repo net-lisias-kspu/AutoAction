@@ -3,702 +3,532 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System.IO;
-using KSP.UI.Screens;
+using System.Reflection;
+using KSP.Localization;
 using static KSP.UI.Screens.CraftBrowserDialog;
 
 namespace AutoAction
 {
-
 	[KSPAddon(KSPAddon.Startup.EditorAny, false)]
 	public class AutoActionEditor : MonoBehaviour
 	{
-		static readonly string ModFolderPath = "AutoAction/";
-		static readonly string FullModFolderPath = KSPUtil.ApplicationRootPath + "GameData/" + ModFolderPath;
+		bool _showBasicGroups;
+		bool _showCustomGroups;
+		bool _isWindowExpanded;
 
-		private bool showBasicGroups = false;
-		private bool showCustomGroups = false;
-		private IButton AABtn; //toolbar button
-		private bool AAWinShow = true; //show window?
-		private static GUISkin AASkin;
-		private static GUIStyle AAWinStyle = null; //window style
-		private static GUIStyle AALblStyle = null; //window style
-		private static GUIStyle AABtnStyle = null; //window style
-		private static GUIStyle AAFldStyle = null; //window style
-		private const int CollapsedWindowHeight = 155;
-		private const int ExpandedWindowHeight = 215;
-		private bool isWindowExpanded = false;
-		public Rect AAWin = new Rect(100, 100, 160, CollapsedWindowHeight); //GUI window rectangle
-		Texture2D ButtonTextureRed = new Texture2D(64, 64); //button textures
-		Texture2D ButtonTextureGreen = new Texture2D(64, 64);
-		Texture2D ButtonTextureGray = new Texture2D(64, 64);
-		string facilityPrefix;
+		Rect _windowRectangle = new Rect(100, 100, 160, CollapsedWindowHeight);
 
-		public bool defaultActivateAbort = false;
-		public bool defaultActivateGear = true;
-		public bool defaultActivateLights = false;
-		public bool defaultActivateBrakes = false;
-		public bool defaultActivateRCS = false;
-		public bool defaultActivateSAS = false;
-		public int defaultSetThrottle = 50;
-		public bool defaultSetPrecCtrl = false;
+		string _facilityPrefix;
 
-		public bool? masterActivateAbort = null; //variables we work with. this is our master "partModule" while in editor
-		public bool? masterActivateGear = null;
-		public bool? masterActivateLights = null;
-		public bool? masterActivateBrakes = null;
-		public bool? masterActivateRCS = null;
-		public bool? masterActivateSAS = null;
-		public int masterActivateGroupA = 0;
-		public int masterActivateGroupB = 0;
-		public int masterActivateGroupC = 0;
-		public int masterActivateGroupD = 0;
-		public int masterActivateGroupE = 0;
-		public int masterActivateGroupF = 0;
-		public bool masterSetThrottleYes = false;
-		public int masterSetThrottle = -50; //end variables
-		public bool? masterSetPrecCtrl = null; //precise control?
+		bool _defaultActivateAbort;
+		bool _defaultActivateGear = true;
+		bool _defaultActivateLights;
+		bool _defaultActivateBrakes;
+		bool _defaultActivateRcs;
+		bool _defaultActivateSas;
+		int _defaultSetThrottle;
+		bool _defaultSetPrecCtrl;
 
-		ApplicationLauncherButton AAEditorButton = null; //stock toolbar button instance
-		ConfigNode AANode;
+		bool? _activateAbort;
+		bool? _activateGear;
+		bool? _activateLights;
+		bool? _activateBrakes;
+		bool? _activateRcs;
+		bool? _activateSas;
+		int? _activateGroupA;
+		int? _activateGroupB;
+		int? _activateGroupC;
+		int? _activateGroupD;
+		int? _activateGroupE;
+		int? _setThrottle;
+		bool? _setPrecCtrl;
 
-		public void OnGUI()
-		{
-			AAOnDraw();
-		}
+		ConfigNode _settings;
 
 		public void Start()
 		{
-			print("AutoActions Version 1.6.2f loaded.");
+			print($"AutoActions Version {Assembly.GetCallingAssembly().GetName().Version} loaded.");
+
 			GameEvents.onEditorLoad.Add(OnShipLoad);
-			AAWinStyle = new GUIStyle(HighLogic.Skin.window); //make our style
-			AAFldStyle = new GUIStyle(HighLogic.Skin.textField) { fontStyle = FontStyle.Normal };
-			//load our button textures
-			ButtonTextureGray.LoadImage(File.ReadAllBytes(FullModFolderPath + "ButtonTexture.png"));
-			ButtonTextureGray.Apply();
-			ButtonTextureGreen.LoadImage(File.ReadAllBytes(FullModFolderPath + "ButtonTextureGreen.png"));
-			ButtonTextureGreen.Apply();
-			ButtonTextureRed.LoadImage(File.ReadAllBytes(FullModFolderPath + "ButtonTextureRed.png"));
-			ButtonTextureRed.Apply();
 
-			AASkin = (GUISkin)MonoBehaviour.Instantiate(HighLogic.Skin);
-			AAWinStyle = new GUIStyle(AASkin.window); //GUI skin style
-			AALblStyle = new GUIStyle(AASkin.label);
-			AAFldStyle = new GUIStyle(AASkin.textField);
-			AAFldStyle.fontStyle = FontStyle.Normal;
-			AAFldStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-			//Font fontTest = Font("calibri");
-			//AALblStyle.font = UnityEngine.Font("calibri");
-			AALblStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
-			AALblStyle.wordWrap = false;
-			AABtnStyle = new GUIStyle(AASkin.button);
-			AABtnStyle.fontStyle = FontStyle.Normal;
-			AABtnStyle.alignment = TextAnchor.MiddleCenter;
-			if(ToolbarManager.ToolbarAvailable) //check if toolbar available, load if it is
+			bool isVab = EditorDriver.editorFacility == EditorFacility.VAB;
+			_facilityPrefix = isVab ? "VAB" : "SPH";
+
+			LoadDefaultSettings();
+			LoadPartModule();
+
+			// Are action groups unlocked?
+			if(_settings.GetValue("OverrideCareer").ParseNullableBool() == true)
 			{
-				AABtn = ToolbarManager.Instance.add("AutoAction", "AABtn");
-				AABtn.TexturePath = ModFolderPath + "AABtn";
-				AABtn.ToolTip = "Auto Actions";
-				AABtn.OnClick += (e) =>
-				{
-					if(e.MouseButton == 0) //simply show/hide window on click
-					{
-						onStockToolbarClick();
-					}
-				};
+				_showCustomGroups = true;
+				_showBasicGroups = true;
 			}
 			else
 			{
-				//AGXShow = true; //toolbar not installed, show AGX regardless
-				//now using stock toolbar as fallback
-				AAEditorButton = ApplicationLauncher.Instance.AddModApplication(onStockToolbarClick, onStockToolbarClick, DummyVoid, DummyVoid, DummyVoid, DummyVoid, ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH, (Texture)GameDatabase.Instance.GetTexture(ModFolderPath + "AABtn", false));
-			}
+				var editorNormLevel = ScenarioUpgradeableFacilities.GetFacilityLevel(
+					isVab
+						? SpaceCenterFacility.VehicleAssemblyBuilding
+						: SpaceCenterFacility.SpaceplaneHangar);
 
-			facilityPrefix = EditorDriver.editorFacility == EditorFacility.SPH ? "SPH" : "VAB";
-
-			AANode = ConfigNode.Load(FullModFolderPath + "AutoAction.settings"); //load .settings file
-			AAWin.x = Convert.ToInt32(AANode.GetValue("WinX"));
-			AAWin.y = Convert.ToInt32(AANode.GetValue("WinY"));
-			defaultActivateAbort = AANode.GetValue(facilityPrefix + "activateAbort") == "On";
-			defaultActivateGear = AANode.GetValue(facilityPrefix + "activateGear") != "Off";
-			defaultActivateLights = AANode.GetValue(facilityPrefix + "activateLights") == "On";
-			defaultActivateBrakes = AANode.GetValue(facilityPrefix + "activateBrakes") == "On";
-			defaultActivateRCS = AANode.GetValue(facilityPrefix + "activateRCS") == "On";
-			defaultActivateSAS = AANode.GetValue(facilityPrefix + "activateSAS") == "On";
-			int.TryParse(AANode.GetValue(facilityPrefix + "setThrottle"), out defaultSetThrottle);
-			defaultSetPrecCtrl = AANode.GetValue(facilityPrefix + "setPrecCtrl") == "On";
-
-			LoadAAPartModule();
-			//ScenarioUpgradeableFacilities upgradeScen = HighLogic.CurrentGame.scenarios.OfType<ScenarioUpgradeableFacilities>().First();
-			//float edLvl = 0;
-			if(AANode.HasValue("OverrideCareer")) //are action groups unlocked?
-			{
-				//print("b");
-				if((string)AANode.GetValue("OverrideCareer") == "1")
-				{
-					//print("c");
-					showCustomGroups = true;
-					showBasicGroups = true;
-				}
-				else
-				{
-
-					if(EditorDriver.editorFacility == EditorFacility.SPH) //we are in SPH, what action groups are unlocked?
-					{
-						if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), false))
-						{
-							showCustomGroups = true;
-							showBasicGroups = true;
-						}
-						else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), false))
-						{
-							showCustomGroups = false;
-							showBasicGroups = true;
-						}
-						else
-						{
-							showCustomGroups = false;
-							showBasicGroups = false;
-						}
-
-					}
-					else //we are in VAB, what action groups are unlocked?
-					{
-						if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding), true))
-						{
-							showCustomGroups = true;
-							showBasicGroups = true;
-						}
-						else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding), true))
-						{
-							showCustomGroups = false;
-							showBasicGroups = true;
-						}
-						else
-						{
-							showCustomGroups = false;
-							showBasicGroups = false;
-						}
-
-					}
-				}
-			}
-			else
-			{
-
-				if(EditorDriver.editorFacility == EditorFacility.SPH) //we are in SPH, what action groups are unlocked?
-				{
-					if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), false))
-					{
-						showCustomGroups = true;
-						showBasicGroups = true;
-					}
-					else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar), false))
-					{
-						showCustomGroups = false;
-						showBasicGroups = true;
-					}
-					else
-					{
-						showCustomGroups = false;
-						showBasicGroups = false;
-					}
-
-				}
-				else //we are in VAB, what action groups are unlocked?
-				{
-					if(GameVariables.Instance.UnlockedActionGroupsCustom(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding), true))
-					{
-						showCustomGroups = true;
-						showBasicGroups = true;
-					}
-					else if(GameVariables.Instance.UnlockedActionGroupsStock(ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding), true))
-					{
-						showCustomGroups = false;
-						showBasicGroups = true;
-					}
-					else
-					{
-						showCustomGroups = false;
-						showBasicGroups = false;
-					}
-
-				}
-			}
-		}//close Start()
-
-		//public void Update()
-		//{
-		//    print("throttle " + masterSetThrottle + masterSetThrottleYes);
-		//}
-
-		public void onStockToolbarClick()
-		{
-			AAWinShow = !AAWinShow;
-		}
-
-		public void DummyVoid()
-		{
-
-		}
-
-		public void LoadAAPartModule() //load from partmodule
-		{
-			try
-			{
-				foreach(Part p in EditorLogic.SortedShipList)
-				{
-					foreach(ModuleAutoAction pmAA in p.Modules.OfType<ModuleAutoAction>())
-					{
-						masterActivateAbort = pmAA.ActivateAbort;
-						masterActivateGear = pmAA.ActivateGear;
-						masterActivateLights = pmAA.ActivateLights;
-						masterActivateBrakes = pmAA.ActivateBrakes;
-						masterActivateRCS = pmAA.ActivateRCS;
-						masterActivateSAS = pmAA.ActivateSAS;
-						masterActivateGroupA = pmAA.activateGroupA;
-						masterActivateGroupB = pmAA.activateGroupB;
-						masterActivateGroupC = pmAA.activateGroupC;
-						masterActivateGroupD = pmAA.activateGroupD;
-						masterActivateGroupE = pmAA.activateGroupE;
-						masterActivateGroupF = pmAA.activateGroupF;
-						if(pmAA.setThrottle != -50)
-						{
-							masterSetThrottle = pmAA.setThrottle;
-							masterSetThrottleYes = true;
-						}
-						else
-						{
-							masterSetThrottle = -50;
-							masterSetThrottleYes = false;
-						}
-						masterSetPrecCtrl = pmAA.SetPrecCtrl;
-					}
-				}
-			}
-			catch
-			{
-				//leave blank, need this to catch the error on entering editor the first time with no vessel loaded because it throws a null ref otherwise
+				_showCustomGroups = GameVariables.Instance.UnlockedActionGroupsCustom(editorNormLevel, isVab);
+				_showBasicGroups = GameVariables.Instance.UnlockedActionGroupsStock(editorNormLevel, isVab);
 			}
 		}
 
 		public void OnDisable()
 		{
-			if(ToolbarManager.ToolbarAvailable) //if toolbar loaded, destroy button on leaving scene
-			{
-				AABtn.Destroy();
-			}
-			else
-			{
-				ApplicationLauncher.Instance.RemoveModApplication(AAEditorButton);
-			}
 			GameEvents.onEditorLoad.Remove(OnShipLoad);
 		}
 
-		public void OnShipLoad(ShipConstruct ship, LoadType loadType)
+		void OnShipLoad(ShipConstruct ship, LoadType loadType)
 		{
 			if(loadType == LoadType.Normal)
+				LoadPartModule();
+		}
+
+		public void OnGUI()
+		{
+			// Only show on actions screen and if at least basic actions are unlocked
+			if(EditorLogic.fetch.editorScreen == EditorScreen.Actions && _showBasicGroups)
 			{
-				LoadAAPartModule();
-			}
-			else
-			{
-				Debug.Log("AutoAction Ship Load of type MERGE");
+				_windowRectangle.height = _isWindowExpanded ? ExpandedWindowHeight : CollapsedWindowHeight;
+				_windowRectangle = GUI.Window(WindowId, _windowRectangle, DrawWindow, Localizer.Format("#ModAutoAction_Title"), WindowStyle);
 			}
 		}
 
-		public void RefreshPartModules() //set values on all ModuleAutoActions on vessel
+		void DrawWindow(int windowId)
 		{
-			foreach(Part p in EditorLogic.SortedShipList)
-			{
-				foreach(ModuleAutoAction pmAA in p.Modules.OfType<ModuleAutoAction>())
-				{
-					pmAA.ActivateAbort = masterActivateAbort;
-					pmAA.ActivateGear = masterActivateGear;
-					pmAA.ActivateLights = masterActivateLights;
-					pmAA.ActivateBrakes = masterActivateBrakes;
-					pmAA.ActivateRCS = masterActivateRCS;
-					pmAA.ActivateSAS = masterActivateSAS;
-					if(masterActivateGroupA == -200)
-					{
-						pmAA.activateGroupA = 0;
-					}
-					else
-					{
-						pmAA.activateGroupA = masterActivateGroupA;
-					}
-					if(masterActivateGroupB == -200)
-					{
-						pmAA.activateGroupB = 0;
-					}
-					else
-					{
-						pmAA.activateGroupB = masterActivateGroupB;
-					}
-					if(masterActivateGroupC == -200)
-					{
-						pmAA.activateGroupC = 0;
-					}
-					else
-					{
-						pmAA.activateGroupC = masterActivateGroupC;
-					}
-					if(masterActivateGroupD == -200)
-					{
-						pmAA.activateGroupD = 0;
-					}
-					else
-					{
-						pmAA.activateGroupD = masterActivateGroupD;
-					}
-					if(masterActivateGroupE == -200)
-					{
-						pmAA.activateGroupE = 0;
-					}
-					else
-					{
-						pmAA.activateGroupE = masterActivateGroupE;
-					}
-					if(masterActivateGroupF == -200)
-					{
-						pmAA.activateGroupF = 0;
-					}
-					else
-					{
-						pmAA.activateGroupF = masterActivateGroupF;
-					}
-
-					if(masterSetThrottleYes)
-					{
-						pmAA.setThrottle = masterSetThrottle;
-					}
-					else
-					{
-						pmAA.setThrottle = -50;
-					}
-					pmAA.SetPrecCtrl = masterSetPrecCtrl;
-				}
-			}
-
-			AANode.SetValue(facilityPrefix + "activateAbort", defaultActivateAbort ? "On" : "Off", true);
-			AANode.SetValue(facilityPrefix + "activateGear", defaultActivateGear ? "On" : "Off", true);
-			AANode.SetValue(facilityPrefix + "activateLights", defaultActivateLights ? "On" : "Off", true);
-			AANode.SetValue(facilityPrefix + "activateBrakes", defaultActivateBrakes ? "On" : "Off", true);
-			AANode.SetValue(facilityPrefix + "activateRCS", defaultActivateRCS ? "On" : "Off", true);
-			AANode.SetValue(facilityPrefix + "activateSAS", defaultActivateSAS ? "On" : "Off", true);
-			AANode.SetValue(facilityPrefix + "setThrottle", defaultSetThrottle.ToString(), true);
-			AANode.SetValue(facilityPrefix + "setPrecCtrl", defaultSetPrecCtrl ? "On" : "Off", true);
-
-			AANode.SetValue("WinX", AAWin.x.ToString(), true);
-			AANode.SetValue("WinY", AAWin.y.ToString(), true);
-
-			AANode.Save(FullModFolderPath + "AutoAction.settings");//same^
-		}//end RefreshPartModules()
-
-		public void AAOnDraw() //our rendering manager
-		{
-			if(EditorLogic.fetch.editorScreen == EditorScreen.Actions && showBasicGroups) //only show on actions screen and if at least basic actions are unlocked
-			{
-				if(AAWinShow)
-				{
-					AAWin.height = isWindowExpanded ? ExpandedWindowHeight : CollapsedWindowHeight;
-					AAWin = GUI.Window(67347792, AAWin, AAWindow, "Auto Actions", AAWinStyle);
-				}
-			}
-		}//close AAOnDraw()
-
-		public void AAWindow(int WindowID)
-		{
-			GUI.Label(new Rect(5, 23, 155, 20), "Per-vessel settings", HighLogic.Skin.label);
-
-			AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(masterActivateAbort);
-			if(GUI.Button(new Rect(5, 45, 50, 18), "Abort", AABtnStyle))
-			{
-				masterActivateAbort = GetNextValue(masterActivateAbort);
-				RefreshPartModules();
-			}
-
-			AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(masterActivateBrakes);
-			if(GUI.Button(new Rect(55, 45, 50, 18), "Brakes", AABtnStyle))
-			{
-				masterActivateBrakes = GetNextValue(masterActivateBrakes);
-				RefreshPartModules();
-			}
-
-			AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(masterActivateGear);
-			if(GUI.Button(new Rect(105, 45, 50, 18), "Gear", AABtnStyle))
-			{
-				masterActivateGear = GetNextValue(masterActivateGear);
-				RefreshPartModules();
-			}
-
-			AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(masterActivateLights);
-			if(GUI.Button(new Rect(5, 63, 50, 18), "Lights", AABtnStyle))
-			{
-				masterActivateLights = GetNextValue(masterActivateLights);
-				RefreshPartModules();
-			}
-
-			AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(masterActivateRCS);
-			if(GUI.Button(new Rect(55, 63, 50, 18), "RCS", AABtnStyle))
-			{
-				masterActivateRCS = GetNextValue(masterActivateRCS);
-				RefreshPartModules();
-			}
-
-			AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(masterActivateSAS);
-			if(GUI.Button(new Rect(105, 63, 50, 18), "SAS", AABtnStyle))
-			{
-				masterActivateSAS = GetNextValue(masterActivateSAS);
-				RefreshPartModules();
-			}
-
-			if(showCustomGroups) //only show custom groups if unlocked in editor
-			{
-				string masterActivateGroupAString = cvertToString(masterActivateGroupA);
-				masterActivateGroupAString = GUI.TextField(new Rect(5, 83, 30, 20), masterActivateGroupAString, 4, AAFldStyle);
-				try
-				{
-					int tempA = cvertToNum(masterActivateGroupAString); //convert string to number
-					if(tempA != masterActivateGroupA)
-					{
-						masterActivateGroupA = tempA;
-						RefreshPartModules();
-					}
-
-				}
-				catch
-				{
-					masterActivateGroupAString = masterActivateGroupA.ToString(); //conversion failed, reset change
-				}
-				string masterActivateGroupBString = cvertToString(masterActivateGroupB);
-				masterActivateGroupBString = GUI.TextField(new Rect(35, 83, 30, 20), masterActivateGroupBString, 4, AAFldStyle);
-				try
-				{
-					int tempB = cvertToNum(masterActivateGroupBString); //convert string to number
-					if(tempB != masterActivateGroupB)
-					{
-						masterActivateGroupB = tempB;
-						RefreshPartModules();
-					}
-
-				}
-				catch
-				{
-					masterActivateGroupBString = masterActivateGroupB.ToString(); //conversion failed, reset change
-				}
-				string masterActivateGroupCString = cvertToString(masterActivateGroupC);
-				masterActivateGroupCString = GUI.TextField(new Rect(65, 83, 30, 20), masterActivateGroupCString, 4, AAFldStyle);
-				try
-				{
-					int tempC = cvertToNum(masterActivateGroupCString); //convert string to number
-					if(tempC != masterActivateGroupC)
-					{
-						masterActivateGroupC = tempC;
-						RefreshPartModules();
-					}
-
-				}
-				catch
-				{
-					masterActivateGroupCString = masterActivateGroupC.ToString(); //conversion failed, reset change
-				}
-				string masterActivateGroupDString = cvertToString(masterActivateGroupD);
-				masterActivateGroupDString = GUI.TextField(new Rect(95, 83, 30, 20), masterActivateGroupDString, 4, AAFldStyle);
-				try
-				{
-					int tempD = cvertToNum(masterActivateGroupDString); //convert string to number
-					if(tempD != masterActivateGroupD)
-					{
-						masterActivateGroupD = tempD;
-						RefreshPartModules();
-					}
-				}
-				catch
-				{
-					masterActivateGroupDString = masterActivateGroupD.ToString(); //conversion failed, reset change
-				}
-				string masterActivateGroupEString = cvertToString(masterActivateGroupE);
-				masterActivateGroupEString = GUI.TextField(new Rect(125, 83, 30, 20), masterActivateGroupEString, 4, AAFldStyle);
-				try
-				{
-					int tempE = cvertToNum(masterActivateGroupEString); //convert string to number
-					if(tempE != masterActivateGroupE)
-					{
-						masterActivateGroupE = tempE;
-						RefreshPartModules();
-					}
-				}
-				catch
-				{
-					masterActivateGroupEString = masterActivateGroupE.ToString(); //conversion failed, reset change
-				}
-			}
+			// Get window width from localization
+			int windowWidth;
+			if(int.TryParse(Localizer.GetStringByTag("#ModAutoAction_WindowWidth"), out windowWidth))
+				_windowRectangle.width = windowWidth;
 			else
-			{
-				GUI.Label(new Rect(10, 83, 155, 20), "Custom actions not available", AALblStyle);
-			}
+				windowWidth = (int)_windowRectangle.width;
+			// Relative width unit
+			float unit = (windowWidth - 10F) / 15F;
 
-			if(masterSetThrottleYes)
-				AABtnStyle.normal.background = AABtnStyle.hover.background = ButtonTextureGreen;
-			else
-				AABtnStyle.normal.background = AABtnStyle.hover.background = ButtonTextureGray;
-			if(GUI.Button(new Rect(5, 105, 50, 20), "Throttle:", AABtnStyle))
+			GUI.Label(
+				new Rect(5, 23, windowWidth - 5, 20),
+				Localizer.Format("#ModAutoAction_PerVesselSettings"),
+				LabelStyle);
+
+			if(GUI.Button(
+				new Rect(5, 45, 5 * unit, 18),
+				Localizer.Format("#ModAutoAction_Abort"),
+				GetButtonStyleByValue(_activateAbort)))
 			{
-				masterSetThrottleYes = !masterSetThrottleYes;
-				if(masterSetThrottleYes)
-				{
-					masterSetThrottle = 0;
-				}
-				else
-				{
-					masterSetThrottle = -50;
-				}
+				_activateAbort = GetNextValue(_activateAbort);
 				RefreshPartModules();
 			}
 
-			if(!masterSetThrottleYes)
+			if(GUI.Button(
+				new Rect(5 + 5 * unit, 45, 5 * unit, 18),
+				Localizer.Format("#ModAutoAction_Brakes"),
+				GetButtonStyleByValue(_activateBrakes)))
 			{
-				GUI.Label(new Rect(60, 105, 50, 20), "default", HighLogic.Skin.label);
+				_activateBrakes = GetNextValue(_activateBrakes);
+				RefreshPartModules();
 			}
-			else
+
+			if(GUI.Button(
+				new Rect(5 + 10 * unit, 45, 5 * unit, 18),
+				Localizer.Format("#ModAutoAction_Gear"),
+				GetButtonStyleByValue(_activateGear)))
 			{
-				string masterSetThrottleString = masterSetThrottle.ToString();
-				masterSetThrottleString = GUI.TextField(new Rect(55, 105, 40, 20), masterSetThrottleString, 4, AAFldStyle);
-				try
+				_activateGear = GetNextValue(_activateGear);
+				RefreshPartModules();
+			}
+
+			if(GUI.Button(
+				new Rect(5, 63, 5 * unit, 18),
+				Localizer.Format("#ModAutoAction_Lights"),
+				GetButtonStyleByValue(_activateLights)))
+			{
+				_activateLights = GetNextValue(_activateLights);
+				RefreshPartModules();
+			}
+
+			if(GUI.Button(
+				new Rect(5 + 5 * unit, 63, 5 * unit, 18),
+				Localizer.Format("#ModAutoAction_Rcs"),
+				GetButtonStyleByValue(_activateRcs)))
+			{
+				_activateRcs = GetNextValue(_activateRcs);
+				RefreshPartModules();
+			}
+
+			if(GUI.Button(
+				new Rect(5 + 10 * unit, 63, 5 * unit, 18),
+				Localizer.Format("#ModAutoAction_Sas"),
+				GetButtonStyleByValue(_activateSas)))
+			{
+				_activateSas = GetNextValue(_activateSas);
+				RefreshPartModules();
+			}
+
+			GUI.Label(
+				new Rect(8, 81, windowWidth - 10, 20),
+				Localizer.Format("#ModAutoAction_CustomActions"),
+				LabelStyle);
+
+			// Only show custom groups if unlocked in editor
+			if(_showCustomGroups)
+			{
+				var activateGroupA = GUI.TextField(
+					new Rect(5, 103, 3 * unit, 20),
+					_activateGroupA.ToStringValue(nullValue: ""),
+					4,
+					TextFieldStyle).ParseNullableInt(minValue: 1);
+				if(activateGroupA != _activateGroupA)
 				{
-					masterSetThrottle = Convert.ToInt32(masterSetThrottleString); //convert string to number
+					_activateGroupA = activateGroupA;
 					RefreshPartModules();
 				}
-				catch
-				{
-					masterSetThrottleString = masterSetThrottle.ToString(); //conversion failed, reset change
-				}
-				GUI.Label(new Rect(97, 90, 10, 20), "%", HighLogic.Skin.label);
-			}
 
-			AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(masterSetPrecCtrl);
-			if(GUI.Button(new Rect(115, 105, 40, 20), "PCtrl", AABtnStyle))
+				var activateGroupB = GUI.TextField(
+					new Rect(5 + 3 * unit, 103, 3 * unit, 20),
+					_activateGroupB.ToStringValue(nullValue: ""),
+					4,
+					TextFieldStyle).ParseNullableInt(minValue: 1);
+				if(activateGroupB != _activateGroupB)
+				{
+					_activateGroupB = activateGroupB;
+					RefreshPartModules();
+				}
+
+				var activateGroupC = GUI.TextField(
+					new Rect(5 + 6 * unit, 103, 3 * unit, 20),
+					_activateGroupC.ToStringValue(nullValue: ""),
+					4,
+					TextFieldStyle).ParseNullableInt(minValue: 1);
+				if(activateGroupC != _activateGroupC)
+				{
+					_activateGroupC = activateGroupC;
+					RefreshPartModules();
+				}
+
+				var activateGroupD = GUI.TextField(
+					new Rect(5 + 9 * unit, 103, 3 * unit, 20),
+					_activateGroupD.ToStringValue(nullValue: ""),
+					4,
+					TextFieldStyle).ParseNullableInt(minValue: 1);
+				if(activateGroupD != _activateGroupD)
+				{
+					_activateGroupD = activateGroupD;
+					RefreshPartModules();
+				}
+
+				var activateGroupE = GUI.TextField(
+					new Rect(5 + 12 * unit, 103, 3 * unit, 20),
+					_activateGroupE.ToStringValue(nullValue: ""),
+					4,
+					TextFieldStyle).ParseNullableInt(minValue: 1);
+				if(activateGroupE != _activateGroupE)
+				{
+					_activateGroupE = activateGroupE;
+					RefreshPartModules();
+				}
+			}
+			else
+				GUI.Label(
+					new Rect(8, 103, windowWidth - 10, 20),
+					Localizer.Format("#ModAutoAction_NotAvailable"),
+					FailLabelStyle);
+
+			if(GUI.Button(
+				new Rect(5, 125, 5 * unit, 20),
+				Localizer.Format("#ModAutoAction_Throttle"),
+				_setThrottle.HasValue ? OnButtonStyle : DefaultButtonStyle))
 			{
-				masterSetPrecCtrl = GetNextValue(masterSetPrecCtrl);
+				_setThrottle = _setThrottle.HasValue
+					? (int?)null
+					: _defaultSetThrottle;
 				RefreshPartModules();
 			}
+
+			if(_setThrottle.HasValue)
+			{
+				var setThrottle = GUI.TextField(
+					new Rect(5 + 5 * unit, 125, 4 * unit, 20),
+					_setThrottle.ToStringValue(nullValue: ""),
+					3,
+					TextFieldStyle).ParseNullableInt(minValue: 0, maxValue: 100);
+				if(setThrottle != _setThrottle)
+				{
+					_setThrottle = setThrottle;
+					RefreshPartModules();
+				}
+
+				GUI.Label(
+					new Rect(10 + 9 * unit, 125, 2 * unit - 5, 20),
+					"%",
+					LabelStyle);
+			}
+			else
+				GUI.Label(
+					new Rect(10 + 5 * unit, 125, 6 * unit - 5, 20),
+					Localizer.Format("#ModAutoAction_Default"),
+					LabelStyle);
+
+			if(GUI.Button(
+				new Rect(5 + 11 * unit, 125, 4 * unit, 20),
+				Localizer.Format("#ModAutoAction_PCtrl"),
+				GetButtonStyleByValue(_setPrecCtrl)))
+			{
+				_setPrecCtrl = GetNextValue(_setPrecCtrl);
+				RefreshPartModules();
+			}
+
 
 			// Default settings
 
-			GUI.Label(new Rect(5, 128, 155, 20), facilityPrefix + " defaults", HighLogic.Skin.label);
+			GUI.Label(
+				new Rect(5, 148, windowWidth - 5, 20),
+				Localizer.Format(_facilityPrefix == "VAB" ? "#ModAutoAction_VabDefaults" : "#ModAutoAction_SphDefaults"),
+				LabelStyle);
 
-			AABtnStyle.normal.background = AABtnStyle.hover.background = ButtonTextureGray;
-			if(GUI.Button(new Rect(110, 130, 30, 18), isWindowExpanded ? "▲" : "▼", AABtnStyle))
+			if(GUI.Button(
+				new Rect(windowWidth - 35, 150, 30, 18),
+				_isWindowExpanded ? "▲" : "▼",
+				DefaultButtonStyle))
 			{
-				isWindowExpanded = !isWindowExpanded;
-				RefreshPartModules();
+				_isWindowExpanded = !_isWindowExpanded;
 			}
 
-			if(isWindowExpanded)
+			if(_isWindowExpanded)
 			{
-				AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(defaultActivateAbort);
-				if(GUI.Button(new Rect(5, 150, 50, 18), "Abort", AABtnStyle))
+				if(GUI.Button(
+					new Rect(5, 170, 5 * unit, 18),
+					Localizer.Format("#ModAutoAction_Abort"),
+					GetButtonStyleByValue(_defaultActivateAbort)))
 				{
-					defaultActivateAbort = !defaultActivateAbort;
-					RefreshPartModules();
+					_defaultActivateAbort = !_defaultActivateAbort;
+					SaveDefaultSettings();
 				}
 
-				AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(defaultActivateBrakes);
-				if(GUI.Button(new Rect(55, 150, 50, 18), "Brakes", AABtnStyle))
+				if(GUI.Button(
+					new Rect(5 + 5 * unit, 170, 5 * unit, 18),
+					Localizer.Format("#ModAutoAction_Brakes"),
+					GetButtonStyleByValue(_defaultActivateBrakes)))
 				{
-					defaultActivateBrakes = !defaultActivateBrakes;
-					RefreshPartModules();
+					_defaultActivateBrakes = !_defaultActivateBrakes;
+					SaveDefaultSettings();
 				}
 
-				AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(defaultActivateGear);
-				if(GUI.Button(new Rect(105, 150, 50, 18), "Gear", AABtnStyle))
+				if(GUI.Button(
+					new Rect(5 + 10 * unit, 170, 5 * unit, 18),
+					Localizer.Format("#ModAutoAction_Gear"),
+					GetButtonStyleByValue(_defaultActivateGear)))
 				{
-					defaultActivateGear = !defaultActivateGear;
-					RefreshPartModules();
+					_defaultActivateGear = !_defaultActivateGear;
+					SaveDefaultSettings();
 				}
 
-				AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(defaultActivateLights);
-				if(GUI.Button(new Rect(5, 168, 50, 18), "Lights", AABtnStyle))
+				if(GUI.Button(
+					new Rect(5, 188, 5 * unit, 18),
+					Localizer.Format("#ModAutoAction_Lights"),
+					GetButtonStyleByValue(_defaultActivateLights)))
 				{
-					defaultActivateLights = !defaultActivateLights;
-					RefreshPartModules();
+					_defaultActivateLights = !_defaultActivateLights;
+					SaveDefaultSettings();
 				}
 
-				AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(defaultActivateRCS);
-				if(GUI.Button(new Rect(55, 168, 50, 18), "RCS", AABtnStyle))
+				if(GUI.Button(
+					new Rect(5 + 5 * unit, 188, 5 * unit, 18),
+					Localizer.Format("#ModAutoAction_Rcs"),
+					GetButtonStyleByValue(_defaultActivateRcs)))
 				{
-					defaultActivateRCS = !defaultActivateRCS;
-					RefreshPartModules();
+					_defaultActivateRcs = !_defaultActivateRcs;
+					SaveDefaultSettings();
 				}
 
-				AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(defaultActivateSAS);
-				if(GUI.Button(new Rect(105, 168, 50, 18), "SAS", AABtnStyle))
+				if(GUI.Button(
+					new Rect(5 + 10 * unit, 188, 5 * unit, 18),
+					Localizer.Format("#ModAutoAction_Sas"),
+					GetButtonStyleByValue(_defaultActivateSas)))
 				{
-					defaultActivateSAS = !defaultActivateSAS;
-					RefreshPartModules();
+					_defaultActivateSas = !_defaultActivateSas;
+					SaveDefaultSettings();
 				}
 
-				GUI.Label(new Rect(5, 188, 50, 20), "Throttle:", HighLogic.Skin.label);
+				GUI.Label(
+					new Rect(5, 208, 5 * unit, 20),
+					Localizer.Format("#ModAutoAction_Throttle"),
+					CenterAlingedLabelStyle);
 
-				string defaultSetThrottleString = defaultSetThrottle.ToString();
-				defaultSetThrottleString = GUI.TextField(new Rect(55, 188, 40, 20), defaultSetThrottleString, 4, AAFldStyle);
-				try
+				var defaultSetThrottle = GUI.TextField(
+					new Rect(5 + 5 * unit, 208, 4 * unit, 20),
+					_defaultSetThrottle.ToStringValue(),
+					3,
+					TextFieldStyle).ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
+				if(defaultSetThrottle != _defaultSetThrottle)
 				{
-					defaultSetThrottle = Convert.ToInt32(defaultSetThrottleString); //convert string to number
-					RefreshPartModules();
+					_defaultSetThrottle = defaultSetThrottle;
+					SaveDefaultSettings();
 				}
-				catch
-				{
-					defaultSetThrottleString = defaultSetThrottle.ToString(); //conversion failed, reset change
-				}
-				GUI.Label(new Rect(97, 173, 10, 20), "%", HighLogic.Skin.label);
 
-				AABtnStyle.normal.background = AABtnStyle.hover.background = GetTextureByValue(defaultSetPrecCtrl);
-				if(GUI.Button(new Rect(115, 188, 40, 20), "PCtrl", AABtnStyle))
+				GUI.Label(
+					new Rect(10 + 9 * unit, 208, 2 * unit - 5, 20),
+					"%",
+					LabelStyle);
+
+				if(GUI.Button(
+					new Rect(5 + 11 * unit, 208, 4 * unit, 20),
+					Localizer.Format("#ModAutoAction_PCtrl"),
+					GetButtonStyleByValue(_defaultSetPrecCtrl)))
 				{
-					defaultSetPrecCtrl = !defaultSetPrecCtrl;
-					RefreshPartModules();
+					_defaultSetPrecCtrl = !_defaultSetPrecCtrl;
+					SaveDefaultSettings();
 				}
 			}
 
-			AABtnStyle.normal.background = ButtonTextureGray;
-			AABtnStyle.hover.background = ButtonTextureGray;
-
-			GUI.DragWindow(); //window is draggable
-		}//close AAWindow()
-
-		public string cvertToString(int num)
-		{
-			if(num == -200)
-			{
-				return "";
-			}
-			else
-			{
-				return num.ToString();
-			}
-		}
-		public int cvertToNum(string str)
-		{
-			if(str == "")
-			{
-				return -200;
-			}
-			else
-			{
-				return Convert.ToInt32(str);
-			}
-		}
-
-		private Texture2D GetTextureByValue(bool? value)
-		{
-			return value.HasValue ? value.Value ? ButtonTextureGreen : ButtonTextureRed : ButtonTextureGray;
+			// Window is draggable
+			GUI.DragWindow();
 		}
 
-		private bool? GetNextValue(bool? value)
+		void RefreshPartModules()
 		{
-			return value.HasValue ? value.Value ? false : (bool?)null : true;
+			var autoActionModules =
+				EditorLogic.SortedShipList
+					?.SelectMany(part => part.Modules.OfType<ModuleAutoAction>());
+
+			if(autoActionModules != null)
+				foreach(var module in autoActionModules)
+					RefreshPartModule(module);
 		}
+
+		void RefreshPartModule(ModuleAutoAction module)
+		{
+			module.ActivateAbort = _activateAbort;
+			module.ActivateBrakes = _activateBrakes;
+			module.ActivateGear = _activateGear;
+			module.ActivateLights = _activateLights;
+			module.ActivateRcs = _activateRcs;
+			module.ActivateSas = _activateSas;
+
+			module.SetThrottle = _setThrottle;
+			module.SetPrecCtrl = _setPrecCtrl;
+
+			module.ActivateGroupA = _activateGroupA;
+			module.ActivateGroupB = _activateGroupB;
+			module.ActivateGroupC = _activateGroupC;
+			module.ActivateGroupD = _activateGroupD;
+			module.ActivateGroupE = _activateGroupE;
+		}
+
+		void LoadPartModule()
+		{
+			var module = EditorLogic.SortedShipList
+				?.SelectMany(part => part.Modules.OfType<ModuleAutoAction>())
+				.FirstOrDefault();
+			if(module != null)
+			{
+				_activateAbort = module.ActivateAbort;
+				_activateGear = module.ActivateGear;
+				_activateLights = module.ActivateLights;
+				_activateBrakes = module.ActivateBrakes;
+				_activateRcs = module.ActivateRcs;
+				_activateSas = module.ActivateSas;
+				_activateGroupA = module.ActivateGroupA;
+				_activateGroupB = module.ActivateGroupB;
+				_activateGroupC = module.ActivateGroupC;
+				_activateGroupD = module.ActivateGroupD;
+				_activateGroupE = module.ActivateGroupE;
+				_setThrottle = module.SetThrottle;
+				_setPrecCtrl = module.SetPrecCtrl;
+			}
+		}
+
+		void LoadDefaultSettings()
+		{
+			_settings = ConfigNode.Load(Static.SettingsFilePath);
+
+			_windowRectangle.x = _settings.GetValue("WinX").ParseNullableInt() ?? 0;
+			_windowRectangle.y = _settings.GetValue("WinY").ParseNullableInt() ?? 0;
+
+			_defaultActivateAbort = _settings.GetValue(_facilityPrefix + "activateAbort").ParseNullableBool() ?? false;
+			_defaultActivateBrakes = _settings.GetValue(_facilityPrefix + "activateBrakes").ParseNullableBool() ?? false;
+			_defaultActivateGear = _settings.GetValue(_facilityPrefix + "activateGear").ParseNullableBool(invertedCompatibilityValue: true) ?? true;
+			_defaultActivateLights = _settings.GetValue(_facilityPrefix + "activateLights").ParseNullableBool() ?? false;
+			_defaultActivateRcs = _settings.GetValue(_facilityPrefix + "activateRCS").ParseNullableBool() ?? false;
+			_defaultActivateSas = _settings.GetValue(_facilityPrefix + "activateSAS").ParseNullableBool() ?? false;
+			_defaultSetThrottle = _settings.GetValue(_facilityPrefix + "setThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
+			_defaultSetPrecCtrl = _settings.GetValue(_facilityPrefix + "setPrecCtrl").ParseNullableBool() ?? false;
+		}
+
+		void SaveDefaultSettings()
+		{
+			_settings.SetValue("WinX", _windowRectangle.x.ToStringValue(), true);
+			_settings.SetValue("WinY", _windowRectangle.y.ToStringValue(), true);
+
+			_settings.SetValue(_facilityPrefix + "activateAbort", _defaultActivateAbort.ToStringValue(), true);
+			_settings.SetValue(_facilityPrefix + "activateBrakes", _defaultActivateBrakes.ToStringValue(), true);
+			_settings.SetValue(_facilityPrefix + "activateGear", _defaultActivateGear.ToStringValue(), true);
+			_settings.SetValue(_facilityPrefix + "activateLights", _defaultActivateLights.ToStringValue(), true);
+			_settings.SetValue(_facilityPrefix + "activateRCS", _defaultActivateRcs.ToStringValue(), true);
+			_settings.SetValue(_facilityPrefix + "activateSAS", _defaultActivateSas.ToStringValue(), true);
+			_settings.SetValue(_facilityPrefix + "setThrottle", _defaultSetThrottle.ToStringValue(), true);
+			_settings.SetValue(_facilityPrefix + "setPrecCtrl", _defaultSetPrecCtrl.ToStringValue(), true);
+
+			_settings.Save(Static.SettingsFilePath);
+		}
+
+		GUIStyle GetButtonStyleByValue(bool? value) =>
+			value.HasValue ? value.Value ? OnButtonStyle : OffButtonStyle : DefaultButtonStyle;
+
+		static bool? GetNextValue(bool? value) =>
+			value.HasValue ? value.Value ? false : (bool?)null : true;
+
+		static GUIStyle GetButtonStyle(Texture2D texture) =>
+			new GUIStyle(Skin.button)
+			{
+				alignment = TextAnchor.MiddleCenter,
+				fontStyle = FontStyle.Normal,
+				normal = { background = texture },
+				hover = { background = texture },
+			};
+
+		static Texture2D LoadTexture(string teaxtureName)
+		{
+			var texture = new Texture2D(64, 64);
+			texture.LoadImage(File.ReadAllBytes(Static.TextureFolderPath + teaxtureName + ".png"));
+			texture.Apply();
+			return texture;
+		}
+
+		// Styles
+		static readonly GUISkin Skin = Instantiate(HighLogic.Skin);
+		static readonly GUIStyle WindowStyle = new GUIStyle(Skin.window);
+		static readonly GUIStyle LabelStyle = new GUIStyle(Skin.label)
+		{
+			wordWrap = false,
+			alignment = TextAnchor.MiddleLeft,
+		};
+		static readonly GUIStyle CenterAlingedLabelStyle = new GUIStyle(Skin.label)
+		{
+			wordWrap = false,
+			alignment = TextAnchor.MiddleCenter,
+		};
+		static readonly GUIStyle FailLabelStyle = new GUIStyle(Skin.label)
+		{
+			wordWrap = false,
+			alignment = TextAnchor.MiddleLeft,
+			normal = { textColor = new Color(0.9f, 0.9f, 0.9f, 1f) },
+		};
+		static readonly GUIStyle TextFieldStyle = new GUIStyle(Skin.textField)
+		{
+			fontStyle = FontStyle.Normal,
+			normal = { textColor = new Color(0.9f, 0.9f, 0.9f, 1f) },
+		};
+
+		static readonly GUIStyle DefaultButtonStyle = GetButtonStyle(LoadTexture("ButtonTexture"));
+		static readonly GUIStyle OffButtonStyle = GetButtonStyle(LoadTexture("ButtonTextureRed"));
+		static readonly GUIStyle OnButtonStyle = GetButtonStyle(LoadTexture("ButtonTextureGreen"));
+
+		const int CollapsedWindowHeight = 175;
+		const int ExpandedWindowHeight = 235;
+
+		const int WindowId = 67347792;
 	}
 }
 

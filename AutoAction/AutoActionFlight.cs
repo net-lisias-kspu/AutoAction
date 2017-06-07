@@ -1,145 +1,143 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KSP.Localization;
 using UnityEngine;
-
 
 namespace AutoAction
 {
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
 	public class AutoActionFlight : MonoBehaviour
 	{
-		static readonly string ModFolderPath = "AutoAction/";
-		static readonly string FullModFolderPath = KSPUtil.ApplicationRootPath + "GameData/" + ModFolderPath;
+		bool _defaultActivateAbort;
+		bool _defaultActivateBrakes;
+		bool _defaultActivateGear = true;
+		bool _defaultActivateLights;
+		bool _defaultActivateRcs;
+		bool _defaultActivateSas;
+		int _defaultSetThrottle;
+		bool _defaultSetPrecCtrl;
 
-		public bool defaultActivateAbort = false;
-		public bool defaultActivateGear = true;
-		public bool defaultActivateLights = false;
-		public bool defaultActivateBrakes = false;
-		public bool defaultActivateRCS = false;
-		public bool defaultActivateSAS = false;
-		public int defaultSetThrottle = 50;
-		public bool defaultSetPrecCtrl = false;
+		Part _rootPart;
 
-		public Part aaRootPart = null;
-
-		FlightInputHandler flightHandler;
+		FlightInputHandler _flightHandler;
 
 		public void Start()
 		{
 			var facilityPrefix = ShipConstruction.ShipType == EditorFacility.SPH ? "SPH" : "VAB";
 
-			var aaNode = ConfigNode.Load(FullModFolderPath + "AutoAction.settings"); //load .settings file
-			defaultActivateAbort = aaNode.GetValue(facilityPrefix + "activateAbort") == "On";
-			defaultActivateGear = aaNode.GetValue(facilityPrefix + "activateGear") != "Off";
-			defaultActivateLights = aaNode.GetValue(facilityPrefix + "activateLights") == "On";
-			defaultActivateBrakes = aaNode.GetValue(facilityPrefix + "activateBrakes") == "On";
-			defaultActivateRCS = aaNode.GetValue(facilityPrefix + "activateRCS") == "On";
-			defaultActivateSAS = aaNode.GetValue(facilityPrefix + "activateSAS") == "On";
-			int.TryParse(aaNode.GetValue(facilityPrefix + "setThrottle"), out defaultSetThrottle);
-			defaultSetPrecCtrl = aaNode.GetValue(facilityPrefix + "setPrecCtrl") == "On";
+			// Load defaults from .settings file
+			var settings = ConfigNode.Load(Static.SettingsFilePath);
+			_defaultActivateAbort = settings.GetValue(facilityPrefix + "activateAbort").ParseNullableBool() ?? false;
+			_defaultActivateBrakes = settings.GetValue(facilityPrefix + "activateBrakes").ParseNullableBool() ?? false;
+			_defaultActivateGear = settings.GetValue(facilityPrefix + "activateGear").ParseNullableBool(invertedCompatibilityValue: true) ?? true;
+			_defaultActivateLights = settings.GetValue(facilityPrefix + "activateLights").ParseNullableBool() ?? false;
+			_defaultActivateRcs = settings.GetValue(facilityPrefix + "activateRCS").ParseNullableBool() ?? false;
+			_defaultActivateSas = settings.GetValue(facilityPrefix + "activateSAS").ParseNullableBool() ?? false;
+			_defaultSetThrottle = settings.GetValue(facilityPrefix + "setThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
+			_defaultSetPrecCtrl = settings.GetValue(facilityPrefix + "setPrecCtrl").ParseNullableBool() ?? false;
 
-			flightHandler = FlightInputHandler.fetch;
+			_flightHandler = FlightInputHandler.fetch;
 		}
 
 		public void Update()
 		{
 			try
-			{//print("AA " + FlightGlobals.ActiveVessel.loaded + " " + FlightGlobals.ActiveVessel.situation + FlightGlobals.ActiveVessel.HoldPhysics);
-				if(!FlightGlobals.ActiveVessel.HoldPhysics) //wait until physics is running to tell us everything is loaded, the first Update() acutally runs while on the black loading screen, action states won't match onscreen otherwise (a deployed solar panel drawn as stowed, etc.)
+			{
+				// Wait until physics is running to tell us everything is loaded,
+				// the first Update() acutally runs while on the black loading screen,
+				// action states won't match onscreen otherwise (a deployed solar panel drawn as stowed, etc.)
+				if(!FlightGlobals.ActiveVessel.HoldPhysics)
 				{
-					if(aaRootPart != FlightGlobals.ActiveVessel.rootPart)
+					if(_rootPart != FlightGlobals.ActiveVessel.rootPart)
 					{
-						//print("Auto act part change");
-						bool aaPMfound = false; //only process first aaPM we find
-						foreach(Part p in FlightGlobals.ActiveVessel.parts)
+						var autoActionPartModules =
+							FlightGlobals.ActiveVessel.parts
+								.SelectMany(part => part.Modules.OfType<ModuleAutoAction>())
+								.Where(module => !module.hasActivated);
+
+						// Only process the first AutoAction part module we find
+						bool moduleFound = false;
+						foreach(var module in autoActionPartModules)
 						{
-							foreach(ModuleAutoAction aaPM in p.Modules.OfType<ModuleAutoAction>())
+							if(!moduleFound)
 							{
-								if(!aaPMfound) //if false, first aaPM we've found
-								{
-									if(!aaPM.hasActivated) //make sure this aaPM has not activated before
-									{
-										FlightGlobals.ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.Abort, aaPM.ActivateAbort ?? defaultActivateAbort);
-										FlightGlobals.ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, aaPM.ActivateBrakes ?? defaultActivateBrakes);
-										FlightGlobals.ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.Gear, aaPM.ActivateGear ?? defaultActivateGear);
-										FlightGlobals.ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.Light, aaPM.ActivateLights ?? defaultActivateLights);
-										FlightGlobals.ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.RCS, aaPM.ActivateRCS ?? defaultActivateRCS);
-										FlightGlobals.ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.SAS, aaPM.ActivateSAS ?? defaultActivateSAS);
-
-										if(aaPM.activateGroupA != 0)
-											callActionGroup(aaPM.activateGroupA);
-										if(aaPM.activateGroupB != 0)
-											callActionGroup(aaPM.activateGroupB);
-										if(aaPM.activateGroupC != 0)
-											callActionGroup(aaPM.activateGroupC);
-										if(aaPM.activateGroupD != 0)
-											callActionGroup(aaPM.activateGroupD);
-										if(aaPM.activateGroupE != 0)
-											callActionGroup(aaPM.activateGroupE);
-										if(aaPM.activateGroupF != 0)
-											callActionGroup(aaPM.activateGroupF);
-
-										var throttle = aaPM.setThrottle >= 0 ? aaPM.setThrottle : defaultSetThrottle;
-										if(throttle >= 0)
-											FlightInputHandler.state.mainThrottle = Mathf.Max(0, Mathf.Min((float)throttle / 100, 1));
-
-										flightHandler.precisionMode = aaPM.SetPrecCtrl ?? defaultSetPrecCtrl;
-										// change the gauge color
-										var gauges = FindObjectOfType<KSP.UI.Screens.Flight.LinearControlGauges>();
-										if(gauges != null)
-											foreach(var image in gauges.inputGaugeImages)
-												image.color = (aaPM.SetPrecCtrl ?? defaultSetPrecCtrl)
-													? XKCDColors.BrightCyan
-													: XKCDColors.Orange;
-
-										aaPM.hasActivated = true; //this aaPM has been processed
-										aaPMfound = true;
-									}
-								}
-								else //aaPM has been found and processed already on this vessel, ignore any more aaPM's we find and mark them processed.
-								{
-									aaPM.hasActivated = true;
-								}
+								moduleFound = true;
+								ProcessModule(module);
 							}
+							module.hasActivated = true;
 						}
 
-						aaRootPart = FlightGlobals.ActiveVessel.rootPart;
+						_rootPart = FlightGlobals.ActiveVessel.rootPart;
 					}
 				}
-				//print("test " + FlightUIController.fetch.stgPitch.Value + "|" + FlightUIController.fetch.stgPitch.pointer.renderer.material.color);
 			}
 			catch
 			{
-				Debug.Log("AutoAction Error: Safe to ignore if you did not just launch a new vessel.");
-			}
-		} //close Update()
-
-		public void callActionGroup(int group)
-		{
-			if(AGXInterface.AGExtInstalled()) //if agx installed, can activate any group
-			{
-				AGXInterface.AGExtToggleGroup(group);
-			}
-			else if(group <= 10) //base KSP can only activate groups 1 through 10
-			{
-				Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
-				KSPActs[1] = KSPActionGroup.Custom01; //setup list to activate groups
-				KSPActs[2] = KSPActionGroup.Custom02;
-				KSPActs[3] = KSPActionGroup.Custom03;
-				KSPActs[4] = KSPActionGroup.Custom04;
-				KSPActs[5] = KSPActionGroup.Custom05;
-				KSPActs[6] = KSPActionGroup.Custom06;
-				KSPActs[7] = KSPActionGroup.Custom07;
-				KSPActs[8] = KSPActionGroup.Custom08;
-				KSPActs[9] = KSPActionGroup.Custom09;
-				KSPActs[10] = KSPActionGroup.Custom10;
-				FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActs[group]);
-			}
-			else //error catch
-			{
-				ScreenMessages.PostScreenMessage("Can not Auto Activate group " + group, 10F, ScreenMessageStyle.UPPER_CENTER);
+				print("AutoAction Error: Safe to ignore if you did not just launch a new vessel.");
 			}
 		}
+
+		void ProcessModule(ModuleAutoAction module)
+		{
+			var actionGroups = FlightGlobals.ActiveVessel.ActionGroups;
+			actionGroups.SetGroup(KSPActionGroup.Abort, module.ActivateAbort ?? _defaultActivateAbort);
+			actionGroups.SetGroup(KSPActionGroup.Brakes, module.ActivateBrakes ?? _defaultActivateBrakes);
+			actionGroups.SetGroup(KSPActionGroup.Gear, module.ActivateGear ?? _defaultActivateGear);
+			actionGroups.SetGroup(KSPActionGroup.Light, module.ActivateLights ?? _defaultActivateLights);
+			actionGroups.SetGroup(KSPActionGroup.RCS, module.ActivateRcs ?? _defaultActivateRcs);
+			actionGroups.SetGroup(KSPActionGroup.SAS, module.ActivateSas ?? _defaultActivateSas);
+
+			FlightInputHandler.state.mainThrottle = Mathf.Max(0, Mathf.Min(1, (module.SetThrottle ?? _defaultSetThrottle) / 100F));
+			SetPrecisionMode(module.SetPrecCtrl ?? _defaultSetPrecCtrl);
+
+			CallActionGroup(module.ActivateGroupA);
+			CallActionGroup(module.ActivateGroupB);
+			CallActionGroup(module.ActivateGroupC);
+			CallActionGroup(module.ActivateGroupD);
+			CallActionGroup(module.ActivateGroupE);
+		}
+
+		void SetPrecisionMode(bool precisionMode)
+		{
+			_flightHandler.precisionMode = precisionMode;
+			// Change the gauge color
+			var gauges = FindObjectOfType<KSP.UI.Screens.Flight.LinearControlGauges>();
+			if(gauges != null)
+				foreach(var image in gauges.inputGaugeImages)
+					image.color = precisionMode
+						? XKCDColors.BrightCyan
+						: XKCDColors.Orange;
+		}
+
+		static void CallActionGroup(int? actionGroup)
+		{
+			if(actionGroup.HasValue)
+			{
+				// If AGX installed, can activate any group
+				if(AgxInterface.IsAgxInstalled())
+					AgxInterface.AgxToggleGroup(actionGroup.Value);
+				// Base KSP can only activate groups 1 through 10
+				else if(actionGroup <= 10)
+					FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KspActions[actionGroup.Value]);
+				// Error catch
+				else
+					ScreenMessages.PostScreenMessage(Localizer.Format("#ModAutoAction_CanNotActivateGroup", actionGroup), 10F, ScreenMessageStyle.UPPER_CENTER);
+			}
+		}
+
+		static readonly IDictionary<int, KSPActionGroup> KspActions = new Dictionary<int, KSPActionGroup>
+		{
+			[1] = KSPActionGroup.Custom01,
+			[2] = KSPActionGroup.Custom02,
+			[3] = KSPActionGroup.Custom03,
+			[4] = KSPActionGroup.Custom04,
+			[5] = KSPActionGroup.Custom05,
+			[6] = KSPActionGroup.Custom06,
+			[7] = KSPActionGroup.Custom07,
+			[8] = KSPActionGroup.Custom08,
+			[9] = KSPActionGroup.Custom09,
+			[10] = KSPActionGroup.Custom10
+		};
 	}
 }

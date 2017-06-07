@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace AutoAction
 {
 	class ModuleAutoAction : PartModule
 	{
-		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)] //has this module been activated in flight?
+		// Has this module been activated in flight?
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
 		public bool hasActivated = false;
 
 		// String type for compatibility
@@ -24,177 +26,98 @@ namespace AutoAction
 		public string activateSAS = "";
 
 		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
-		public int activateGroupA = 0;
-		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
-		public int activateGroupB = 0;
-		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
-		public int activateGroupC = 0;
-		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
-		public int activateGroupD = 0;
-		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
-		public int activateGroupE = 0;
-		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
-		public int activateGroupF = 0;
-
-		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
-		public int setThrottle = -50;
-
+		public string setThrottle = "";
 		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
 		public string setPrecCtrl = "";
 
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string activateGroupA = "";
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string activateGroupB = "";
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string activateGroupC = "";
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string activateGroupD = "";
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string activateGroupE = "";
+
+
 		public bool? ActivateAbort
 		{
-			get { return StringToNullableBool(activateAbort); }
-			set { activateAbort = NullableBoolToString(value); }
+			get => activateAbort.ParseNullableBool();
+			set => activateAbort = value.ToStringValue();
 		}
+
 		public bool? ActivateBrakes
 		{
-			get { return StringToNullableBool(activateBrakes); }
-			set { activateBrakes = NullableBoolToString(value); }
+			get => activateBrakes.ParseNullableBool();
+			set => activateBrakes = value.ToStringValue();
 		}
+
 		public bool? ActivateGear
 		{
-			get { return StringToNullableBool(activateGear, invertedCompatibilityValue: true); }
-			set { activateGear = NullableBoolToString(value); }
+			get => activateGear.ParseNullableBool(invertedCompatibilityValue: true);
+			set => activateGear = value.ToStringValue();
 		}
+
 		public bool? ActivateLights
 		{
-			get { return StringToNullableBool(activateLights); }
-			set { activateLights = NullableBoolToString(value); }
+			get => activateLights.ParseNullableBool();
+			set => activateLights = value.ToStringValue();
 		}
-		public bool? ActivateRCS
+
+		public bool? ActivateRcs
 		{
-			get { return StringToNullableBool(activateRCS); }
-			set { activateRCS = NullableBoolToString(value); }
+			get => activateRCS.ParseNullableBool();
+			set => activateRCS = value.ToStringValue();
 		}
-		public bool? ActivateSAS
+
+		public bool? ActivateSas
 		{
-			get { return StringToNullableBool(activateSAS); }
-			set { activateSAS = NullableBoolToString(value); }
+			get => activateSAS.ParseNullableBool();
+			set => activateSAS = value.ToStringValue();
 		}
+
+		public int? SetThrottle
+		{
+			get => setThrottle.ParseNullableInt(minValue: 0, maxValue: 100);
+			set => setThrottle = value.ToStringValue(nullValue: "Default");
+		}
+
 		public bool? SetPrecCtrl
 		{
-			get { return StringToNullableBool(setPrecCtrl); }
-			set { setPrecCtrl = NullableBoolToString(value); }
+			get => setPrecCtrl.ParseNullableBool();
+			set => setPrecCtrl = value.ToStringValue();
 		}
 
-
-		private string NullableBoolToString(bool? value)
+		public int? ActivateGroupA
 		{
-			return value.HasValue ? value.Value ? "On" : "Off" : "Default";
+			get => activateGroupA.ParseNullableInt(minValue: 1);
+			set => activateGroupA = value.ToStringValue();
 		}
 
-		private bool? StringToNullableBool(string value, bool invertedCompatibilityValue = false)
+		public int? ActivateGroupB
 		{
-			bool compatibilityValue;
-			if(bool.TryParse(value, out compatibilityValue))
-				return compatibilityValue ? !invertedCompatibilityValue : (bool?)null;
-			else
-				return
-					value == "On" ? true : value == "Off" ? false : (bool?)null;
+			get => activateGroupB.ParseNullableInt(minValue: 1);
+			set => activateGroupB = value.ToStringValue();
 		}
 
-		//public void Start()
-		//{
-		//	print("Auto activate run!");
-		//	if(HighLogic.LoadedSceneIsFlight)
-		//	{
-		//		if(activateAbort)
-		//		{
-		//			this.part.vessel.ActionGroups.ToggleGroup(KSPActionGroup.Abort);
-		//			activateAbort = false;
-		//		}
-		//		if(activateBrakes)
-		//		{
-		//			FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActionGroup.Brakes);
-		//			activateBrakes = false;
-		//		}
-		//		if(activateGear)
-		//		{
-		//			FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActionGroup.Gear);
-		//			activateGear = false;
-		//		}
-		//		if(activateLights)
-		//		{
-		//			FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActionGroup.Light);
-		//			activateLights = false;
-		//		}
-		//		if(activateRCS)
-		//		{
-		//			FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActionGroup.RCS);
-		//			activateRCS = false;
-		//		}
-		//		if(activateSAS)
-		//		{
-		//			FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActionGroup.SAS);
-		//			activateSAS = false;
-		//		}
+		public int? ActivateGroupC
+		{
+			get => activateGroupC.ParseNullableInt(minValue: 1);
+			set => activateGroupC = value.ToStringValue();
+		}
 
-		//		if(activateGroupA != 0)
-		//		{
-		//			callActionGroup(activateGroupA);
-		//			activateGroupA = 0;
-		//		}
-		//		if(activateGroupB != 0)
-		//		{
-		//			callActionGroup(activateGroupB);
-		//			activateGroupB = 0;
-		//		}
-		//		if(activateGroupC != 0)
-		//		{
-		//			callActionGroup(activateGroupC);
-		//			activateGroupC = 0;
-		//		}
-		//		if(activateGroupD != 0)
-		//		{
-		//			callActionGroup(activateGroupD);
-		//			activateGroupD = 0;
-		//		}
-		//		if(activateGroupE != 0)
-		//		{
-		//			callActionGroup(activateGroupE);
-		//			activateGroupE = 0;
-		//		}
-		//		if(activateGroupF != 0)
-		//		{
-		//			callActionGroup(activateGroupF);
-		//			activateGroupF = 0;
-		//		}
-		//		if(setThrottle != -50)
-		//		{
-		//			FlightInputHandler.state.mainThrottle = Mathf.Max(0, Mathf.Min((float)setThrottle / 100, 1)); //set throttle, from 0 to 1
-		//			setThrottle = -50;
-		//		}
+		public int? ActivateGroupD
+		{
+			get => activateGroupD.ParseNullableInt(minValue: 1);
+			set => activateGroupD = value.ToStringValue();
+		}
 
-		//	}//close IF statement checking flight scene
-		//	print("Auto activate end run");
-		//}//close START()
-
-		//public void callActionGroup(int group)
-		//{
-		//	if(AGXInterface.AGExtInstalled()) //if agx installed, can activate any group
-		//	{
-		//		AGXInterface.AGExtToggleGroup(group);
-		//	}
-		//	else if(group <= 10) //base KSP can only activate groups 1 through 10
-		//	{
-		//		Dictionary<int, KSPActionGroup> KSPActs = new Dictionary<int, KSPActionGroup>();
-		//		KSPActs[1] = KSPActionGroup.Custom01; //setup list to activate groups
-		//		KSPActs[2] = KSPActionGroup.Custom02;
-		//		KSPActs[3] = KSPActionGroup.Custom03;
-		//		KSPActs[4] = KSPActionGroup.Custom04;
-		//		KSPActs[5] = KSPActionGroup.Custom05;
-		//		KSPActs[6] = KSPActionGroup.Custom06;
-		//		KSPActs[7] = KSPActionGroup.Custom07;
-		//		KSPActs[8] = KSPActionGroup.Custom08;
-		//		KSPActs[9] = KSPActionGroup.Custom09;
-		//		KSPActs[10] = KSPActionGroup.Custom10;
-		//		FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActs[group]);
-		//	}
-		//	else //error catch
-		//	{
-		//		ScreenMessages.PostScreenMessage("Can not Auto Activate group " + group, 10F, ScreenMessageStyle.UPPER_CENTER);
-		//	}
-		//}
+		public int? ActivateGroupE
+		{
+			get => activateGroupE.ParseNullableInt(minValue: 1);
+			set => activateGroupE = value.ToStringValue();
+		}
 	}
 }
