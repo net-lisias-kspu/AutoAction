@@ -14,9 +14,10 @@ namespace AutoAction
 	{
 		bool _showBasicGroups;
 		bool _showCustomGroups;
-		bool _isWindowExpanded;
+		bool _isTrimSectionExpanded;
+		bool _isDefaultsSectionExpanded;
 
-		Rect _windowRectangle = new Rect(100, 100, 160, CollapsedWindowHeight);
+		Rect _windowRectangle = new Rect(100, 100, InitialWindowWidth, InitialWindowHeight);
 
 		string _facilityPrefix;
 
@@ -42,6 +43,16 @@ namespace AutoAction
 		int? _activateGroupE;
 		int? _setThrottle;
 		bool? _setPrecCtrl;
+		//int _setPitchTrim;
+		//int _setYawTrim;
+		//int _setRollTrim;
+		//int _setWheelMotorTrim;
+		//int _setWheelSteerTrim;
+		string _setPitchTrimString;
+		string _setYawTrimString;
+		string _setRollTrimString;
+		string _setWheelMotorTrimString;
+		string _setWheelSteerTrimString;
 
 		ConfigNode _settings;
 
@@ -91,299 +102,219 @@ namespace AutoAction
 			// Only show on actions screen and if at least basic actions are unlocked
 			if(EditorLogic.fetch.editorScreen == EditorScreen.Actions && _showBasicGroups)
 			{
-				_windowRectangle.height = _isWindowExpanded ? ExpandedWindowHeight : CollapsedWindowHeight;
+				//_windowRectangle.height = _isWindowExpanded ? ExpandedWindowHeight : CollapsedWindowHeight;
 				_windowRectangle = GUI.Window(WindowId, _windowRectangle, DrawWindow, Localizer.Format("#ModAutoAction_Title"), WindowStyle);
 			}
 		}
 
 		void DrawWindow(int windowId)
 		{
+			int windowHeight = 23;
+
 			// Get window width from localization
-			int windowWidth;
-			if(int.TryParse(Localizer.GetStringByTag("#ModAutoAction_WindowWidth"), out windowWidth))
-				_windowRectangle.width = windowWidth;
-			else
-				windowWidth = (int)_windowRectangle.width;
+			int windowWidth =
+				int.TryParse(Localizer.GetStringByTag("#ModAutoAction_WindowWidth"), out int localizationWindowWidth)
+					? localizationWindowWidth
+					: InitialWindowWidth;
 			// Relative width unit
 			float unit = (windowWidth - 10F) / 15F;
 
-			GUI.Label(
-				new Rect(5, 23, windowWidth - 5, 20),
-				Localizer.Format("#ModAutoAction_PerVesselSettings"),
-				LabelStyle);
+			Label(0, 15, 0, "#ModAutoAction_PerVesselSettings");
+			windowHeight += 22;
 
-			if(GUI.Button(
-				new Rect(5, 45, 5 * unit, 18),
-				Localizer.Format("#ModAutoAction_Abort"),
-				GetButtonStyleByValue(_activateAbort)))
-			{
-				_activateAbort = GetNextValue(_activateAbort);
-				RefreshPartModules();
-			}
+			ThreeStateButton(0, 5, "#ModAutoAction_Abort", RefreshPartModules, ref _activateAbort);
+			ThreeStateButton(5, 5, "#ModAutoAction_Brakes", RefreshPartModules, ref _activateBrakes);
+			ThreeStateButton(10, 5, "#ModAutoAction_Gear", RefreshPartModules, ref _activateGear);
+			windowHeight += 20;
 
-			if(GUI.Button(
-				new Rect(5 + 5 * unit, 45, 5 * unit, 18),
-				Localizer.Format("#ModAutoAction_Brakes"),
-				GetButtonStyleByValue(_activateBrakes)))
-			{
-				_activateBrakes = GetNextValue(_activateBrakes);
-				RefreshPartModules();
-			}
-
-			if(GUI.Button(
-				new Rect(5 + 10 * unit, 45, 5 * unit, 18),
-				Localizer.Format("#ModAutoAction_Gear"),
-				GetButtonStyleByValue(_activateGear)))
-			{
-				_activateGear = GetNextValue(_activateGear);
-				RefreshPartModules();
-			}
-
-			if(GUI.Button(
-				new Rect(5, 63, 5 * unit, 18),
-				Localizer.Format("#ModAutoAction_Lights"),
-				GetButtonStyleByValue(_activateLights)))
-			{
-				_activateLights = GetNextValue(_activateLights);
-				RefreshPartModules();
-			}
-
-			if(GUI.Button(
-				new Rect(5 + 5 * unit, 63, 5 * unit, 18),
-				Localizer.Format("#ModAutoAction_Rcs"),
-				GetButtonStyleByValue(_activateRcs)))
-			{
-				_activateRcs = GetNextValue(_activateRcs);
-				RefreshPartModules();
-			}
-
-			if(GUI.Button(
-				new Rect(5 + 10 * unit, 63, 5 * unit, 18),
-				Localizer.Format("#ModAutoAction_Sas"),
-				GetButtonStyleByValue(_activateSas)))
-			{
-				_activateSas = GetNextValue(_activateSas);
-				RefreshPartModules();
-			}
-
-			GUI.Label(
-				new Rect(8, 81, windowWidth - 10, 20),
-				Localizer.Format("#ModAutoAction_CustomActions"),
-				LabelStyle);
+			ThreeStateButton(0, 5, "#ModAutoAction_Lights", RefreshPartModules, ref _activateLights);
+			ThreeStateButton(5, 5, "#ModAutoAction_Rcs", RefreshPartModules, ref _activateRcs);
+			ThreeStateButton(10, 5, "#ModAutoAction_Sas", RefreshPartModules, ref _activateSas);
+			windowHeight += 20;
 
 			// Only show custom groups if unlocked in editor
 			if(_showCustomGroups)
 			{
-				var activateGroupA = GUI.TextField(
-					new Rect(5, 103, 3 * unit, 20),
-					_activateGroupA.ToStringValue(nullValue: ""),
-					4,
-					TextFieldStyle).ParseNullableInt(minValue: 1);
-				if(activateGroupA != _activateGroupA)
-				{
-					_activateGroupA = activateGroupA;
-					RefreshPartModules();
-				}
+				Label(0, 15, 3, "#ModAutoAction_CustomActions");
+				windowHeight += 22;
 
-				var activateGroupB = GUI.TextField(
-					new Rect(5 + 3 * unit, 103, 3 * unit, 20),
-					_activateGroupB.ToStringValue(nullValue: ""),
-					4,
-					TextFieldStyle).ParseNullableInt(minValue: 1);
-				if(activateGroupB != _activateGroupB)
-				{
-					_activateGroupB = activateGroupB;
-					RefreshPartModules();
-				}
-
-				var activateGroupC = GUI.TextField(
-					new Rect(5 + 6 * unit, 103, 3 * unit, 20),
-					_activateGroupC.ToStringValue(nullValue: ""),
-					4,
-					TextFieldStyle).ParseNullableInt(minValue: 1);
-				if(activateGroupC != _activateGroupC)
-				{
-					_activateGroupC = activateGroupC;
-					RefreshPartModules();
-				}
-
-				var activateGroupD = GUI.TextField(
-					new Rect(5 + 9 * unit, 103, 3 * unit, 20),
-					_activateGroupD.ToStringValue(nullValue: ""),
-					4,
-					TextFieldStyle).ParseNullableInt(minValue: 1);
-				if(activateGroupD != _activateGroupD)
-				{
-					_activateGroupD = activateGroupD;
-					RefreshPartModules();
-				}
-
-				var activateGroupE = GUI.TextField(
-					new Rect(5 + 12 * unit, 103, 3 * unit, 20),
-					_activateGroupE.ToStringValue(nullValue: ""),
-					4,
-					TextFieldStyle).ParseNullableInt(minValue: 1);
-				if(activateGroupE != _activateGroupE)
-				{
-					_activateGroupE = activateGroupE;
-					RefreshPartModules();
-				}
-			}
-			else
-				GUI.Label(
-					new Rect(8, 103, windowWidth - 10, 20),
-					Localizer.Format("#ModAutoAction_NotAvailable"),
-					FailLabelStyle);
-
-			if(GUI.Button(
-				new Rect(5, 125, 5 * unit, 20),
-				Localizer.Format("#ModAutoAction_Throttle"),
-				_setThrottle.HasValue ? OnButtonStyle : DefaultButtonStyle))
-			{
-				_setThrottle = _setThrottle.HasValue
-					? (int?)null
-					: _defaultSetThrottle;
-				RefreshPartModules();
+				NullableNumberField(0, 3, 4, RefreshPartModules, ref _activateGroupA, minValue: 1);
+				NullableNumberField(3, 3, 4, RefreshPartModules, ref _activateGroupB, minValue: 1);
+				NullableNumberField(6, 3, 4, RefreshPartModules, ref _activateGroupC, minValue: 1);
+				NullableNumberField(9, 3, 4, RefreshPartModules, ref _activateGroupD, minValue: 1);
+				NullableNumberField(12, 3, 4, RefreshPartModules, ref _activateGroupE, minValue: 1);
+				windowHeight += 20;
 			}
 
+			windowHeight += 4;
+
+			OnDefaultButton(0, 5, "#ModAutoAction_Throttle", ref _setThrottle, RefreshPartModules, _defaultSetThrottle);
 			if(_setThrottle.HasValue)
 			{
-				var setThrottle = GUI.TextField(
-					new Rect(5 + 5 * unit, 125, 4 * unit, 20),
-					_setThrottle.ToStringValue(nullValue: ""),
-					3,
-					TextFieldStyle).ParseNullableInt(minValue: 0, maxValue: 100);
-				if(setThrottle != _setThrottle)
-				{
-					_setThrottle = setThrottle;
-					RefreshPartModules();
-				}
-
-				GUI.Label(
-					new Rect(10 + 9 * unit, 125, 2 * unit - 5, 20),
-					"%",
-					LabelStyle);
+				NullableNumberField(5, 4, 3, RefreshPartModules, ref _setThrottle, minValue: 0, maxValue: 100);
+				Label(9, 2, 5, "%");
 			}
 			else
-				GUI.Label(
-					new Rect(10 + 5 * unit, 125, 6 * unit - 5, 20),
-					Localizer.Format("#ModAutoAction_Default"),
-					LabelStyle);
-
-			if(GUI.Button(
-				new Rect(5 + 11 * unit, 125, 4 * unit, 20),
-				Localizer.Format("#ModAutoAction_PCtrl"),
-				GetButtonStyleByValue(_setPrecCtrl)))
 			{
-				_setPrecCtrl = GetNextValue(_setPrecCtrl);
-				RefreshPartModules();
+				Label(5, 6, 5, "#ModAutoAction_Default");
 			}
+			ThreeStateButton(11, 4, "#ModAutoAction_PCtrl", RefreshPartModules, ref _setPrecCtrl);
+			windowHeight += 23;
 
+			// Trim
+
+			Label(0, 11, 0, "#ModAutoAction_Trim", RightAlingedLabelStyle);
+			ExpandButton(ref _isTrimSectionExpanded);
+			windowHeight += 22;
+
+			if(_isTrimSectionExpanded)
+			{
+				windowHeight += 2;
+
+				Label(0, 8, 0, "#ModAutoAction_Pitch", RightAlingedLabelStyle);
+				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setPitchTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				windowHeight += 24;
+
+				Label(0, 8, 0, "#ModAutoAction_Yaw", RightAlingedLabelStyle);
+				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setYawTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				windowHeight += 24;
+
+				Label(0, 8, 0, "#ModAutoAction_Roll", RightAlingedLabelStyle);
+				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setRollTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				windowHeight += 24;
+
+				Label(0, 8, 0, "#ModAutoAction_WheelThrottle", RightAlingedLabelStyle);
+				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setWheelMotorTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				windowHeight += 24;
+
+				Label(0, 8, 0, "#ModAutoAction_WheelSteer", RightAlingedLabelStyle);
+				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setWheelSteerTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				windowHeight += 26;
+			}
 
 			// Default settings
 
-			GUI.Label(
-				new Rect(5, 148, windowWidth - 5, 20),
-				Localizer.Format(_facilityPrefix == "VAB" ? "#ModAutoAction_VabDefaults" : "#ModAutoAction_SphDefaults"),
-				LabelStyle);
+			Label(0, 15, 0, _facilityPrefix == "VAB" ? "#ModAutoAction_VabDefaults" : "#ModAutoAction_SphDefaults");
+			ExpandButton(ref _isDefaultsSectionExpanded);
+			windowHeight += 22;
 
-			if(GUI.Button(
-				new Rect(windowWidth - 35, 150, 30, 18),
-				_isWindowExpanded ? "▲" : "▼",
-				DefaultButtonStyle))
+			if(_isDefaultsSectionExpanded)
 			{
-				_isWindowExpanded = !_isWindowExpanded;
+				OnOffButton(0, 5, "#ModAutoAction_Abort", SaveDefaultSettings, ref _defaultActivateAbort);
+				OnOffButton(5, 5, "#ModAutoAction_Brakes", SaveDefaultSettings, ref _defaultActivateBrakes);
+				OnOffButton(10, 5, "#ModAutoAction_Gear", SaveDefaultSettings, ref _defaultActivateGear);
+				windowHeight += 20;
+
+				OnOffButton(0, 5, "#ModAutoAction_Lights", SaveDefaultSettings, ref _defaultActivateLights);
+				OnOffButton(5, 5, "#ModAutoAction_Rcs", SaveDefaultSettings, ref _defaultActivateRcs);
+				OnOffButton(10, 5, "#ModAutoAction_Sas", SaveDefaultSettings, ref _defaultActivateSas);
+				windowHeight += 24;
+
+				Label(0, 5, 0, "#ModAutoAction_Throttle", CenterAlingedLabelStyle);
+				NumberField(5, 4, 3, SaveDefaultSettings, ref _defaultSetThrottle, defaultValue: 0, minValue: 0, maxValue: 100);
+				Label(9, 2, 5, "%");
+				OnOffButton(11, 4, "#ModAutoAction_PCtrl", SaveDefaultSettings, ref _defaultSetPrecCtrl);
+				windowHeight += 22;
 			}
 
-			if(_isWindowExpanded)
-			{
-				if(GUI.Button(
-					new Rect(5, 170, 5 * unit, 18),
-					Localizer.Format("#ModAutoAction_Abort"),
-					GetButtonStyleByValue(_defaultActivateAbort)))
-				{
-					_defaultActivateAbort = !_defaultActivateAbort;
-					SaveDefaultSettings();
-				}
+			windowHeight += 5;
 
-				if(GUI.Button(
-					new Rect(5 + 5 * unit, 170, 5 * unit, 18),
-					Localizer.Format("#ModAutoAction_Brakes"),
-					GetButtonStyleByValue(_defaultActivateBrakes)))
-				{
-					_defaultActivateBrakes = !_defaultActivateBrakes;
-					SaveDefaultSettings();
-				}
-
-				if(GUI.Button(
-					new Rect(5 + 10 * unit, 170, 5 * unit, 18),
-					Localizer.Format("#ModAutoAction_Gear"),
-					GetButtonStyleByValue(_defaultActivateGear)))
-				{
-					_defaultActivateGear = !_defaultActivateGear;
-					SaveDefaultSettings();
-				}
-
-				if(GUI.Button(
-					new Rect(5, 188, 5 * unit, 18),
-					Localizer.Format("#ModAutoAction_Lights"),
-					GetButtonStyleByValue(_defaultActivateLights)))
-				{
-					_defaultActivateLights = !_defaultActivateLights;
-					SaveDefaultSettings();
-				}
-
-				if(GUI.Button(
-					new Rect(5 + 5 * unit, 188, 5 * unit, 18),
-					Localizer.Format("#ModAutoAction_Rcs"),
-					GetButtonStyleByValue(_defaultActivateRcs)))
-				{
-					_defaultActivateRcs = !_defaultActivateRcs;
-					SaveDefaultSettings();
-				}
-
-				if(GUI.Button(
-					new Rect(5 + 10 * unit, 188, 5 * unit, 18),
-					Localizer.Format("#ModAutoAction_Sas"),
-					GetButtonStyleByValue(_defaultActivateSas)))
-				{
-					_defaultActivateSas = !_defaultActivateSas;
-					SaveDefaultSettings();
-				}
-
-				GUI.Label(
-					new Rect(5, 208, 5 * unit, 20),
-					Localizer.Format("#ModAutoAction_Throttle"),
-					CenterAlingedLabelStyle);
-
-				var defaultSetThrottle = GUI.TextField(
-					new Rect(5 + 5 * unit, 208, 4 * unit, 20),
-					_defaultSetThrottle.ToStringValue(),
-					3,
-					TextFieldStyle).ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
-				if(defaultSetThrottle != _defaultSetThrottle)
-				{
-					_defaultSetThrottle = defaultSetThrottle;
-					SaveDefaultSettings();
-				}
-
-				GUI.Label(
-					new Rect(10 + 9 * unit, 208, 2 * unit - 5, 20),
-					"%",
-					LabelStyle);
-
-				if(GUI.Button(
-					new Rect(5 + 11 * unit, 208, 4 * unit, 20),
-					Localizer.Format("#ModAutoAction_PCtrl"),
-					GetButtonStyleByValue(_defaultSetPrecCtrl)))
-				{
-					_defaultSetPrecCtrl = !_defaultSetPrecCtrl;
-					SaveDefaultSettings();
-				}
-			}
+			_windowRectangle.width = windowWidth;
+			_windowRectangle.height = windowHeight;
 
 			// Window is draggable
 			GUI.DragWindow();
+
+
+			#region UI elements
+
+			void Label(float left, float width, float indent, string text, GUIStyle style = null)
+			{
+				GUI.Label(new Rect(5 + left * unit + indent, windowHeight, width * unit - indent, 20), Localizer.Format(text), style ?? LabelStyle);
+			}
+
+			void OnOffButton(float left, float width, string text, Action changeAction, ref bool value)
+			{
+				if(GUI.Button(new Rect(5 + left * unit, windowHeight, width * unit, 20), Localizer.Format(text), GetButtonStyleByValue(value)))
+				{
+					value = !value;
+					changeAction();
+				}
+			}
+
+			void OnDefaultButton(float left, float width, string text, ref int? value, Action changeAction, int defaultValue)
+			{
+				if(GUI.Button(new Rect(5 + left * unit, windowHeight, width * unit, 20), Localizer.Format(text), value.HasValue ? OnButtonStyle : DefaultButtonStyle))
+				{
+					value = value.HasValue
+						? (int?)null
+						: defaultValue;
+					changeAction();
+				}
+			}
+
+			void ThreeStateButton(float left, float width, string text, Action changeAction, ref bool? value)
+			{
+				if(GUI.Button(new Rect(5 + left * unit, windowHeight, width * unit, 20), Localizer.Format(text), GetButtonStyleByValue(value)))
+				{
+					value = GetNextValue(value);
+					changeAction();
+				}
+			}
+
+			void ExpandButton(ref bool value)
+			{
+				if(GUI.Button(new Rect(windowWidth - 35, windowHeight + 2, 30, 18), value ? "▲" : "▼", DefaultButtonStyle))
+					value = !value;
+			}
+
+			void NumberField(float left, float width, int maxLength, Action changeAction, ref int value, int defaultValue, int minValue = int.MinValue, int maxValue = int.MaxValue)
+			{
+				var fieldValue =
+					GUI.TextField(new Rect(5 + left * unit, windowHeight, width * unit, 20), value.ToStringValue(), maxLength, TextFieldStyle)
+						.ParseNullableInt(minValue, maxValue) ?? defaultValue;
+				if(fieldValue != value)
+				{
+					value = fieldValue;
+					changeAction();
+				}
+			}
+
+			void NullableNumberField(float left, float width, int maxLength, Action changeAction, ref int? value, int minValue = int.MinValue, int maxValue = int.MaxValue)
+			{
+				var fieldValue =
+					GUI.TextField(new Rect(5 + left * unit, windowHeight, width * unit, 20), value.ToStringValue(nullValue: ""), maxLength, TextFieldStyle)
+						.ParseNullableInt(minValue, maxValue);
+				if(fieldValue != value)
+				{
+					value = fieldValue;
+					changeAction();
+				}
+			}
+
+			void NumberUpDown(float left, float width, int maxLength, Action changeAction, ref string value, int defaultValue, int minValue = int.MinValue, int maxValue = int.MaxValue)
+			{
+				var fieldValue = GUI.TextField(new Rect(5 + left * unit, windowHeight, width * unit - 16, 20), value, maxLength, TextFieldStyle);
+				if(fieldValue != value)
+				{
+					value = fieldValue;
+					changeAction();
+				}
+				if(GUI.Button(new Rect(5 + (left + width) * unit - 16, windowHeight - 1, 16, 11), "▴", DefaultButtonStyle))
+				{
+					var numberValue = fieldValue.ParseNullableInt(minValue, maxValue) ?? defaultValue;
+					value = Math.Min(maxValue, numberValue + 1).ToStringSigned();
+					changeAction();
+				}
+				if(GUI.Button(new Rect(5 + (left + width) * unit - 16, windowHeight + 10, 16, 11), "▾", DefaultButtonStyle))
+				{
+					var numberValue = fieldValue.ParseNullableInt(minValue, maxValue) ?? defaultValue;
+					value = Math.Max(minValue, numberValue - 1).ToStringSigned();
+					changeAction();
+				}
+			}
+
+			#endregion
 		}
 
 		void RefreshPartModules()
@@ -414,6 +345,12 @@ namespace AutoAction
 			module.ActivateGroupC = _activateGroupC;
 			module.ActivateGroupD = _activateGroupD;
 			module.ActivateGroupE = _activateGroupE;
+
+			module.SetPitchTrim = _setPitchTrimString.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
+			module.SetYawTrim = _setYawTrimString.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
+			module.SetRollTrim = _setRollTrimString.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
+			module.SetWheelMotorTrim = _setWheelMotorTrimString.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
+			module.SetWheelSteerTrim = _setWheelSteerTrimString.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
 		}
 
 		void LoadPartModule()
@@ -436,6 +373,18 @@ namespace AutoAction
 				_activateGroupE = module.ActivateGroupE;
 				_setThrottle = module.SetThrottle;
 				_setPrecCtrl = module.SetPrecCtrl;
+				_setPitchTrimString = module.SetPitchTrim.ToStringSigned();
+				_setYawTrimString = module.SetYawTrim.ToStringSigned();
+				_setRollTrimString = module.SetRollTrim.ToStringSigned();
+				_setWheelMotorTrimString = module.SetWheelMotorTrim.ToStringSigned();
+				_setWheelSteerTrimString = module.SetWheelSteerTrim.ToStringSigned();
+
+				_isTrimSectionExpanded =
+					module.SetPitchTrim != 0 ||
+					module.SetYawTrim != 0 ||
+					module.SetRollTrim != 0 ||
+					module.SetWheelMotorTrim != 0 ||
+					module.SetWheelSteerTrim != 0;
 			}
 		}
 
@@ -509,6 +458,11 @@ namespace AutoAction
 			wordWrap = false,
 			alignment = TextAnchor.MiddleCenter,
 		};
+		static readonly GUIStyle RightAlingedLabelStyle = new GUIStyle(Skin.label)
+		{
+			wordWrap = false,
+			alignment = TextAnchor.MiddleRight,
+		};
 		static readonly GUIStyle FailLabelStyle = new GUIStyle(Skin.label)
 		{
 			wordWrap = false,
@@ -525,8 +479,8 @@ namespace AutoAction
 		static readonly GUIStyle OffButtonStyle = GetButtonStyle(LoadTexture("ButtonTextureRed"));
 		static readonly GUIStyle OnButtonStyle = GetButtonStyle(LoadTexture("ButtonTextureGreen"));
 
-		const int CollapsedWindowHeight = 175;
-		const int ExpandedWindowHeight = 235;
+		const int InitialWindowWidth = 160;
+		const int InitialWindowHeight = 175;
 
 		const int WindowId = 67347792;
 	}

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace AutoAction
@@ -40,6 +39,17 @@ namespace AutoAction
 		public string activateGroupD = "";
 		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
 		public string activateGroupE = "";
+
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string setPitchTrim = "";
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string setYawTrim = "";
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string setRollTrim = "";
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string setWheelMotorTrim = "";
+		[KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false)]
+		public string setWheelSteerTrim = "";
 
 
 		public bool? ActivateAbort
@@ -118,6 +128,36 @@ namespace AutoAction
 		{
 			get => activateGroupE.ParseNullableInt(minValue: 1);
 			set => activateGroupE = value.ToStringValue();
+		}
+
+		public int SetPitchTrim
+		{
+			get => setPitchTrim.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
+			set => setPitchTrim = value.ToStringValue();
+		}
+
+		public int SetYawTrim
+		{
+			get => setYawTrim.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
+			set => setYawTrim = value.ToStringValue();
+		}
+
+		public int SetRollTrim
+		{
+			get => setRollTrim.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
+			set => setRollTrim = value.ToStringValue();
+		}
+
+		public int SetWheelMotorTrim
+		{
+			get => setWheelMotorTrim.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
+			set => setWheelMotorTrim = value.ToStringValue();
+		}
+
+		public int SetWheelSteerTrim
+		{
+			get => setWheelSteerTrim.ParseNullableInt(minValue: -500, maxValue: 500) ?? 0;
+			set => setWheelSteerTrim = value.ToStringValue();
 		}
 	}
 }

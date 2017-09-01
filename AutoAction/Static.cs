@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 
 namespace AutoAction
 {
@@ -26,6 +25,9 @@ namespace AutoAction
 		public static string ToStringValue(this int? nullableInt, string nullValue = "None") =>
 			nullableInt?.ToStringValue() ?? nullValue;
 
+		public static string ToStringSigned(this int value) =>
+			value != 0 ? (value > 0 ? "+" : "−") + Math.Abs(value).ToString(CultureInfo.InvariantCulture) : "0";
+
 		public static string ToStringValue(this bool value, string falseValue = "Off", string trueValue = "On") =>
 			value
 				? trueValue
@@ -38,7 +40,7 @@ namespace AutoAction
 
 		public static int? ParseNullableInt(this string text, int minValue = int.MinValue, int maxValue = int.MaxValue) =>
 			text != null
-				? int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)
+				? int.TryParse(text.Replace("−", "-"), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)
 					? minValue <= value && value <= maxValue
 						? value
 						: (int?)null

@@ -44,9 +44,6 @@ namespace AutoAction
 		{
 			try
 			{
-				// Wait until physics is running to tell us everything is loaded,
-				// the first Update() acutally runs while on the black loading screen,
-				// action states won't match onscreen otherwise (a deployed solar panel drawn as stowed, etc.)
 				if(!FlightGlobals.ActiveVessel.HoldPhysics)
 				{
 					if(_rootPart != FlightGlobals.ActiveVessel.rootPart)
@@ -90,6 +87,12 @@ namespace AutoAction
 
 			FlightInputHandler.state.mainThrottle = Mathf.Max(0, Mathf.Min(1, (module.SetThrottle ?? _defaultSetThrottle) / 100F));
 			SetPrecisionMode(module.SetPrecCtrl ?? _defaultSetPrecCtrl);
+
+			FlightInputHandler.state.pitchTrim = TrimStep * module.SetPitchTrim;
+			FlightInputHandler.state.yawTrim = TrimStep * module.SetYawTrim;
+			FlightInputHandler.state.rollTrim = TrimStep * module.SetRollTrim;
+			FlightInputHandler.state.wheelThrottleTrim = TrimStep * module.SetWheelMotorTrim;
+			FlightInputHandler.state.wheelSteerTrim = -TrimStep * module.SetWheelSteerTrim; // Inverted
 
 			CallActionGroup(module.ActivateGroupA);
 			CallActionGroup(module.ActivateGroupB);
@@ -139,5 +142,7 @@ namespace AutoAction
 			[9] = KSPActionGroup.Custom09,
 			[10] = KSPActionGroup.Custom10
 		};
+
+		const float TrimStep = 0.002F;
 	}
 }
