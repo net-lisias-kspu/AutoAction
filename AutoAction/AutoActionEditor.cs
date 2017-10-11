@@ -294,7 +294,7 @@ namespace AutoAction
 
 			void NumberUpDown(float left, float width, int maxLength, Action changeAction, ref string value, int defaultValue, int minValue = int.MinValue, int maxValue = int.MaxValue)
 			{
-				var fieldValue = GUI.TextField(new Rect(5 + left * unit, windowHeight, width * unit - 16, 20), value, maxLength, TextFieldStyle);
+				var fieldValue = GUI.TextField(new Rect(5 + left * unit, windowHeight, width * unit - 16, 20), value, maxLength, NumberUpDownTextFieldStyle);
 				if(fieldValue != value)
 				{
 					value = fieldValue;
@@ -472,6 +472,12 @@ namespace AutoAction
 		static readonly GUIStyle TextFieldStyle = new GUIStyle(Skin.textField)
 		{
 			fontStyle = FontStyle.Normal,
+			normal = { textColor = new Color(0.9f, 0.9f, 0.9f, 1f) },
+		};
+		static readonly GUIStyle NumberUpDownTextFieldStyle = new GUIStyle(Skin.textField)
+		{
+			fontStyle = FontStyle.Normal,
+			alignment = TextAnchor.MiddleRight,
 			normal = { textColor = new Color(0.9f, 0.9f, 0.9f, 1f) },
 		};
 
