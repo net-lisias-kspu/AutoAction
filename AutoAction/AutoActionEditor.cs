@@ -100,7 +100,7 @@ namespace AutoAction
 		public void OnGUI()
 		{
 			// Only show on actions screen and if at least basic actions are unlocked
-			if(EditorLogic.fetch.editorScreen == EditorScreen.Actions && _showBasicGroups)
+			if(EditorLogic.fetch?.editorScreen == EditorScreen.Actions && _showBasicGroups)
 			{
 				//_windowRectangle.height = _isWindowExpanded ? ExpandedWindowHeight : CollapsedWindowHeight;
 				_windowRectangle = GUI.Window(WindowId, _windowRectangle, DrawWindow, Localizer.Format("#ModAutoAction_Title"), WindowStyle);
