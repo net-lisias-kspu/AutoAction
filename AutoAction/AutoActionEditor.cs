@@ -294,6 +294,8 @@ namespace AutoAction
 
 			void NumberUpDown(float left, float width, int maxLength, Action changeAction, ref string value, int defaultValue, int minValue = int.MinValue, int maxValue = int.MaxValue)
 			{
+				if(string.IsNullOrEmpty(value))
+					value = defaultValue.ToStringSigned();
 				var fieldValue = GUI.TextField(new Rect(5 + left * unit, windowHeight, width * unit - 16, 20), value, maxLength, NumberUpDownTextFieldStyle);
 				if(fieldValue != value)
 				{
