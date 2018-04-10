@@ -22,8 +22,8 @@ namespace AutoAction
 		string _facilityPrefix;
 
 		bool _defaultActivateAbort;
-		bool _defaultActivateGear = true;
-		bool _defaultActivateLights;
+		//bool _defaultActivateGear = true;
+		//bool _defaultActivateLights;
 		bool _defaultActivateBrakes;
 		bool _defaultActivateRcs;
 		bool _defaultActivateSas;
@@ -117,53 +117,57 @@ namespace AutoAction
 					? localizationWindowWidth
 					: InitialWindowWidth;
 			// Relative width unit
-			float unit = (windowWidth - 10F) / 15F;
+			float unit = (windowWidth - 10F) / 20F;
 
-			Label(0, 15, 0, "#ModAutoAction_PerVesselSettings");
+			Label(0, 20, 0, "#ModAutoAction_PerVesselSettings");
 			windowHeight += 22;
 
-			ThreeStateButton(0, 5, "#ModAutoAction_Abort", RefreshPartModules, ref _activateAbort);
-			ThreeStateButton(5, 5, "#ModAutoAction_Brakes", RefreshPartModules, ref _activateBrakes);
-			ThreeStateButton(10, 5, "#ModAutoAction_Gear", RefreshPartModules, ref _activateGear);
+			ThreeStateButton(0, 10, "#ModAutoAction_Abort", RefreshPartModules, ref _activateAbort);
+			ThreeStateButton(10, 10, "#ModAutoAction_Brakes", RefreshPartModules, ref _activateBrakes);
 			windowHeight += 20;
 
-			ThreeStateButton(0, 5, "#ModAutoAction_Lights", RefreshPartModules, ref _activateLights);
-			ThreeStateButton(5, 5, "#ModAutoAction_Rcs", RefreshPartModules, ref _activateRcs);
-			ThreeStateButton(10, 5, "#ModAutoAction_Sas", RefreshPartModules, ref _activateSas);
+			ThreeStateButton(0, 10, "#ModAutoAction_Rcs", RefreshPartModules, ref _activateRcs);
+			ThreeStateButton(10, 10, "#ModAutoAction_Sas", RefreshPartModules, ref _activateSas);
+			windowHeight += 20;
+
+			ThreeStateButton(0, 10, "#ModAutoAction_Gear", RefreshPartModules, ref _activateGear);
+			ThreeStateButton(10, 10, "#ModAutoAction_Lights", RefreshPartModules, ref _activateLights);
 			windowHeight += 20;
 
 			// Only show custom groups if unlocked in editor
 			if(_showCustomGroups)
 			{
-				Label(0, 15, 3, "#ModAutoAction_CustomActions");
+				Label(0, 20, 3, "#ModAutoAction_CustomActions");
 				windowHeight += 22;
 
-				NullableNumberField(0, 3, 4, RefreshPartModules, ref _activateGroupA, minValue: 1);
-				NullableNumberField(3, 3, 4, RefreshPartModules, ref _activateGroupB, minValue: 1);
-				NullableNumberField(6, 3, 4, RefreshPartModules, ref _activateGroupC, minValue: 1);
-				NullableNumberField(9, 3, 4, RefreshPartModules, ref _activateGroupD, minValue: 1);
-				NullableNumberField(12, 3, 4, RefreshPartModules, ref _activateGroupE, minValue: 1);
+				NullableNumberField(0, 4, 4, RefreshPartModules, ref _activateGroupA, minValue: 1);
+				NullableNumberField(4, 4, 4, RefreshPartModules, ref _activateGroupB, minValue: 1);
+				NullableNumberField(8, 4, 4, RefreshPartModules, ref _activateGroupC, minValue: 1);
+				NullableNumberField(12, 4, 4, RefreshPartModules, ref _activateGroupD, minValue: 1);
+				NullableNumberField(16, 4, 4, RefreshPartModules, ref _activateGroupE, minValue: 1);
 				windowHeight += 20;
 			}
 
 			windowHeight += 4;
 
-			OnDefaultButton(0, 5, "#ModAutoAction_Throttle", ref _setThrottle, RefreshPartModules, _defaultSetThrottle);
+			ThreeStateButton(0, 20, "#ModAutoAction_PCtrl", RefreshPartModules, ref _setPrecCtrl);
+			windowHeight += 24;
+
+			OnDefaultButton(0, 9, "#ModAutoAction_Throttle", ref _setThrottle, RefreshPartModules, _defaultSetThrottle);
 			if(_setThrottle.HasValue)
 			{
-				NullableNumberField(5, 4, 3, RefreshPartModules, ref _setThrottle, minValue: 0, maxValue: 100);
-				Label(9, 2, 5, "%");
+				NullableNumberField(10, 8, 3, RefreshPartModules, ref _setThrottle, minValue: 0, maxValue: 100);
+				Label(18, 2, 5, "%");
 			}
 			else
 			{
-				Label(5, 6, 5, "#ModAutoAction_Default");
+				Label(10, 10, 5, "#ModAutoAction_Default");
 			}
-			ThreeStateButton(11, 4, "#ModAutoAction_PCtrl", RefreshPartModules, ref _setPrecCtrl);
 			windowHeight += 23;
 
 			// Trim
 
-			Label(0, 11, 0, "#ModAutoAction_Trim", RightAlingedLabelStyle);
+			Label(0, 15, 0, "#ModAutoAction_Trim", RightAlingedLabelStyle);
 			ExpandButton(ref _isTrimSectionExpanded);
 			windowHeight += 22;
 
@@ -171,49 +175,49 @@ namespace AutoAction
 			{
 				windowHeight += 2;
 
-				Label(0, 8, 0, "#ModAutoAction_Pitch", RightAlingedLabelStyle);
-				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setPitchTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				Label(0, 10, 0, "#ModAutoAction_Pitch", RightAlingedLabelStyle);
+				NumberUpDown(11, 9, 4, RefreshPartModules, ref _setPitchTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
 				windowHeight += 24;
 
-				Label(0, 8, 0, "#ModAutoAction_Yaw", RightAlingedLabelStyle);
-				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setYawTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				Label(0, 10, 0, "#ModAutoAction_Yaw", RightAlingedLabelStyle);
+				NumberUpDown(11, 9, 4, RefreshPartModules, ref _setYawTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
 				windowHeight += 24;
 
-				Label(0, 8, 0, "#ModAutoAction_Roll", RightAlingedLabelStyle);
-				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setRollTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				Label(0, 10, 0, "#ModAutoAction_Roll", RightAlingedLabelStyle);
+				NumberUpDown(11, 9, 4, RefreshPartModules, ref _setRollTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
 				windowHeight += 24;
 
-				Label(0, 8, 0, "#ModAutoAction_WheelThrottle", RightAlingedLabelStyle);
-				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setWheelMotorTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				Label(0, 10, 0, "#ModAutoAction_WheelThrottle", RightAlingedLabelStyle);
+				NumberUpDown(11, 9, 4, RefreshPartModules, ref _setWheelMotorTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
 				windowHeight += 24;
 
-				Label(0, 8, 0, "#ModAutoAction_WheelSteer", RightAlingedLabelStyle);
-				NumberUpDown(9, 6, 4, RefreshPartModules, ref _setWheelSteerTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
+				Label(0, 10, 0, "#ModAutoAction_WheelSteer", RightAlingedLabelStyle);
+				NumberUpDown(11, 9, 4, RefreshPartModules, ref _setWheelSteerTrimString, defaultValue: 0, minValue: -500, maxValue: 500);
 				windowHeight += 26;
 			}
 
 			// Default settings
 
-			Label(0, 15, 0, _facilityPrefix == "VAB" ? "#ModAutoAction_VabDefaults" : "#ModAutoAction_SphDefaults");
+			Label(0, 20, 0, _facilityPrefix == "VAB" ? "#ModAutoAction_VabDefaults" : "#ModAutoAction_SphDefaults");
 			ExpandButton(ref _isDefaultsSectionExpanded);
 			windowHeight += 22;
 
 			if(_isDefaultsSectionExpanded)
 			{
-				OnOffButton(0, 5, "#ModAutoAction_Abort", SaveDefaultSettings, ref _defaultActivateAbort);
-				OnOffButton(5, 5, "#ModAutoAction_Brakes", SaveDefaultSettings, ref _defaultActivateBrakes);
-				OnOffButton(10, 5, "#ModAutoAction_Gear", SaveDefaultSettings, ref _defaultActivateGear);
+				OnOffButton(0, 10, "#ModAutoAction_Abort", SaveDefaultSettings, ref _defaultActivateAbort);
+				OnOffButton(10, 10, "#ModAutoAction_Brakes", SaveDefaultSettings, ref _defaultActivateBrakes);
 				windowHeight += 20;
 
-				OnOffButton(0, 5, "#ModAutoAction_Lights", SaveDefaultSettings, ref _defaultActivateLights);
-				OnOffButton(5, 5, "#ModAutoAction_Rcs", SaveDefaultSettings, ref _defaultActivateRcs);
-				OnOffButton(10, 5, "#ModAutoAction_Sas", SaveDefaultSettings, ref _defaultActivateSas);
+				OnOffButton(0, 10, "#ModAutoAction_Rcs", SaveDefaultSettings, ref _defaultActivateRcs);
+				OnOffButton(10, 10, "#ModAutoAction_Sas", SaveDefaultSettings, ref _defaultActivateSas);
+				windowHeight += 20;
+
+				OnOffButton(0, 20, "#ModAutoAction_PCtrl", SaveDefaultSettings, ref _defaultSetPrecCtrl);
 				windowHeight += 24;
 
-				Label(0, 5, 0, "#ModAutoAction_Throttle", CenterAlingedLabelStyle);
-				NumberField(5, 4, 3, SaveDefaultSettings, ref _defaultSetThrottle, defaultValue: 0, minValue: 0, maxValue: 100);
-				Label(9, 2, 5, "%");
-				OnOffButton(11, 4, "#ModAutoAction_PCtrl", SaveDefaultSettings, ref _defaultSetPrecCtrl);
+				Label(0, 9, 0, "#ModAutoAction_Throttle", CenterAlingedLabelStyle);
+				NumberField(10, 8, 3, SaveDefaultSettings, ref _defaultSetThrottle, defaultValue: 0, minValue: 0, maxValue: 100);
+				Label(18, 2, 5, "%");
 				windowHeight += 22;
 			}
 
@@ -228,14 +232,16 @@ namespace AutoAction
 
 			#region UI elements
 
+			const float Margin = 5;
+
 			void Label(float left, float width, float indent, string text, GUIStyle style = null)
 			{
-				GUI.Label(new Rect(5 + left * unit + indent, windowHeight, width * unit - indent, 20), Localizer.Format(text), style ?? LabelStyle);
+				GUI.Label(new Rect(Margin + left * unit + indent, windowHeight, width * unit - indent, 20), Localizer.Format(text), style ?? LabelStyle);
 			}
 
 			void OnOffButton(float left, float width, string text, Action changeAction, ref bool value)
 			{
-				if(GUI.Button(new Rect(5 + left * unit, windowHeight, width * unit, 20), Localizer.Format(text), GetButtonStyleByValue(value)))
+				if(GUI.Button(new Rect(Margin + left * unit, windowHeight, width * unit, 20), Localizer.Format(text), GetButtonStyleByValue(value)))
 				{
 					value = !value;
 					changeAction();
@@ -244,7 +250,7 @@ namespace AutoAction
 
 			void OnDefaultButton(float left, float width, string text, ref int? value, Action changeAction, int defaultValue)
 			{
-				if(GUI.Button(new Rect(5 + left * unit, windowHeight, width * unit, 20), Localizer.Format(text), value.HasValue ? OnButtonStyle : DefaultButtonStyle))
+				if(GUI.Button(new Rect(Margin + left * unit, windowHeight, width * unit, 20), Localizer.Format(text), value.HasValue ? OnButtonStyle : DefaultButtonStyle))
 				{
 					value = value.HasValue
 						? (int?)null
@@ -255,7 +261,7 @@ namespace AutoAction
 
 			void ThreeStateButton(float left, float width, string text, Action changeAction, ref bool? value)
 			{
-				if(GUI.Button(new Rect(5 + left * unit, windowHeight, width * unit, 20), Localizer.Format(text), GetButtonStyleByValue(value)))
+				if(GUI.Button(new Rect(Margin + left * unit, windowHeight, width * unit, 20), Localizer.Format(text), GetButtonStyleByValue(value)))
 				{
 					value = GetNextValue(value);
 					changeAction();
@@ -271,7 +277,7 @@ namespace AutoAction
 			void NumberField(float left, float width, int maxLength, Action changeAction, ref int value, int defaultValue, int minValue = int.MinValue, int maxValue = int.MaxValue)
 			{
 				var fieldValue =
-					GUI.TextField(new Rect(5 + left * unit, windowHeight, width * unit, 20), value.ToStringValue(), maxLength, TextFieldStyle)
+					GUI.TextField(new Rect(Margin + left * unit, windowHeight, width * unit, 20), value.ToStringValue(), maxLength, TextFieldStyle)
 						.ParseNullableInt(minValue, maxValue) ?? defaultValue;
 				if(fieldValue != value)
 				{
@@ -283,7 +289,7 @@ namespace AutoAction
 			void NullableNumberField(float left, float width, int maxLength, Action changeAction, ref int? value, int minValue = int.MinValue, int maxValue = int.MaxValue)
 			{
 				var fieldValue =
-					GUI.TextField(new Rect(5 + left * unit, windowHeight, width * unit, 20), value.ToStringValue(nullValue: ""), maxLength, TextFieldStyle)
+					GUI.TextField(new Rect(Margin + left * unit, windowHeight, width * unit, 20), value.ToStringValue(nullValue: ""), maxLength, TextFieldStyle)
 						.ParseNullableInt(minValue, maxValue);
 				if(fieldValue != value)
 				{
@@ -296,19 +302,19 @@ namespace AutoAction
 			{
 				if(string.IsNullOrEmpty(value))
 					value = defaultValue.ToStringSigned();
-				var fieldValue = GUI.TextField(new Rect(5 + left * unit, windowHeight, width * unit - 16, 20), value, maxLength, NumberUpDownTextFieldStyle);
+				var fieldValue = GUI.TextField(new Rect(Margin + left * unit, windowHeight, width * unit - 16, 20), value, maxLength, NumberUpDownTextFieldStyle);
 				if(fieldValue != value)
 				{
 					value = fieldValue;
 					changeAction();
 				}
-				if(GUI.Button(new Rect(5 + (left + width) * unit - 16, windowHeight - 1, 16, 11), "▴", DefaultButtonStyle))
+				if(GUI.Button(new Rect(Margin + (left + width) * unit - 16, windowHeight - 1, 16, 11), "▴", DefaultButtonStyle))
 				{
 					var numberValue = fieldValue.ParseNullableInt(minValue, maxValue) ?? defaultValue;
 					value = Math.Min(maxValue, numberValue + 1).ToStringSigned();
 					changeAction();
 				}
-				if(GUI.Button(new Rect(5 + (left + width) * unit - 16, windowHeight + 10, 16, 11), "▾", DefaultButtonStyle))
+				if(GUI.Button(new Rect(Margin + (left + width) * unit - 16, windowHeight + 10, 16, 11), "▾", DefaultButtonStyle))
 				{
 					var numberValue = fieldValue.ParseNullableInt(minValue, maxValue) ?? defaultValue;
 					value = Math.Max(minValue, numberValue - 1).ToStringSigned();
@@ -399,8 +405,8 @@ namespace AutoAction
 
 			_defaultActivateAbort = _settings.GetValue(_facilityPrefix + "activateAbort").ParseNullableBool() ?? false;
 			_defaultActivateBrakes = _settings.GetValue(_facilityPrefix + "activateBrakes").ParseNullableBool() ?? false;
-			_defaultActivateGear = _settings.GetValue(_facilityPrefix + "activateGear").ParseNullableBool(invertedCompatibilityValue: true) ?? true;
-			_defaultActivateLights = _settings.GetValue(_facilityPrefix + "activateLights").ParseNullableBool() ?? false;
+			//_defaultActivateGear = _settings.GetValue(_facilityPrefix + "activateGear").ParseNullableBool(invertedCompatibilityValue: true) ?? true;
+			//_defaultActivateLights = _settings.GetValue(_facilityPrefix + "activateLights").ParseNullableBool() ?? false;
 			_defaultActivateRcs = _settings.GetValue(_facilityPrefix + "activateRCS").ParseNullableBool() ?? false;
 			_defaultActivateSas = _settings.GetValue(_facilityPrefix + "activateSAS").ParseNullableBool() ?? false;
 			_defaultSetThrottle = _settings.GetValue(_facilityPrefix + "setThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
@@ -414,8 +420,8 @@ namespace AutoAction
 
 			_settings.SetValue(_facilityPrefix + "activateAbort", _defaultActivateAbort.ToStringValue(), true);
 			_settings.SetValue(_facilityPrefix + "activateBrakes", _defaultActivateBrakes.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "activateGear", _defaultActivateGear.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "activateLights", _defaultActivateLights.ToStringValue(), true);
+			//_settings.SetValue(_facilityPrefix + "activateGear", _defaultActivateGear.ToStringValue(), true);
+			//_settings.SetValue(_facilityPrefix + "activateLights", _defaultActivateLights.ToStringValue(), true);
 			_settings.SetValue(_facilityPrefix + "activateRCS", _defaultActivateRcs.ToStringValue(), true);
 			_settings.SetValue(_facilityPrefix + "activateSAS", _defaultActivateSas.ToStringValue(), true);
 			_settings.SetValue(_facilityPrefix + "setThrottle", _defaultSetThrottle.ToStringValue(), true);

@@ -11,8 +11,8 @@ namespace AutoAction
 	{
 		bool _defaultActivateAbort;
 		bool _defaultActivateBrakes;
-		bool _defaultActivateGear = true;
-		bool _defaultActivateLights;
+		//bool _defaultActivateGear = true;
+		//bool _defaultActivateLights;
 		bool _defaultActivateRcs;
 		bool _defaultActivateSas;
 		int _defaultSetThrottle;
@@ -30,8 +30,8 @@ namespace AutoAction
 			var settings = ConfigNode.Load(Static.SettingsFilePath);
 			_defaultActivateAbort = settings.GetValue(facilityPrefix + "activateAbort").ParseNullableBool() ?? false;
 			_defaultActivateBrakes = settings.GetValue(facilityPrefix + "activateBrakes").ParseNullableBool() ?? false;
-			_defaultActivateGear = settings.GetValue(facilityPrefix + "activateGear").ParseNullableBool(invertedCompatibilityValue: true) ?? true;
-			_defaultActivateLights = settings.GetValue(facilityPrefix + "activateLights").ParseNullableBool() ?? false;
+			//_defaultActivateGear = settings.GetValue(facilityPrefix + "activateGear").ParseNullableBool(invertedCompatibilityValue: true) ?? true;
+			//_defaultActivateLights = settings.GetValue(facilityPrefix + "activateLights").ParseNullableBool() ?? false;
 			_defaultActivateRcs = settings.GetValue(facilityPrefix + "activateRCS").ParseNullableBool() ?? false;
 			_defaultActivateSas = settings.GetValue(facilityPrefix + "activateSAS").ParseNullableBool() ?? false;
 			_defaultSetThrottle = settings.GetValue(facilityPrefix + "setThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
@@ -80,10 +80,21 @@ namespace AutoAction
 			var actionGroups = FlightGlobals.ActiveVessel.ActionGroups;
 			actionGroups.SetGroup(KSPActionGroup.Abort, module.ActivateAbort ?? _defaultActivateAbort);
 			actionGroups.SetGroup(KSPActionGroup.Brakes, module.ActivateBrakes ?? _defaultActivateBrakes);
-			actionGroups.SetGroup(KSPActionGroup.Gear, module.ActivateGear ?? _defaultActivateGear);
-			actionGroups.SetGroup(KSPActionGroup.Light, module.ActivateLights ?? _defaultActivateLights);
 			actionGroups.SetGroup(KSPActionGroup.RCS, module.ActivateRcs ?? _defaultActivateRcs);
 			actionGroups.SetGroup(KSPActionGroup.SAS, module.ActivateSas ?? _defaultActivateSas);
+
+			if(module.ActivateGear.HasValue)
+			{
+				FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActionGroup.Gear);
+				if(module.ActivateGear.Value != FlightGlobals.ActiveVessel.ActionGroups[KSPActionGroup.Gear])
+					FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActionGroup.Gear);
+			}
+			if(module.ActivateLights.HasValue)
+			{
+				FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActionGroup.Light);
+				if(module.ActivateLights.Value != FlightGlobals.ActiveVessel.ActionGroups[KSPActionGroup.Light])
+					FlightGlobals.ActiveVessel.ActionGroups.ToggleGroup(KSPActionGroup.Light);
+			}
 
 			FlightInputHandler.state.mainThrottle = Mathf.Max(0, Mathf.Min(1, (module.SetThrottle ?? _defaultSetThrottle) / 100F));
 			SetPrecisionMode(module.SetPrecCtrl ?? _defaultSetPrecCtrl);
