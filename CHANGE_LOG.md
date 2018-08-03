@@ -1,5 +1,11 @@
 # AutoAction :: Change Log
 
+* 2017-1019: 1.9.3 (Formicant) for KSP 1.3.1
+	+ Exception on Editor to Flight scene change fixed.
+* 2017-1011: 1.9.2 (Formicant) for KSP 1.3.1
+	+ Updated to KSP 1.3.1
+* 2017-0903: 1.9.1 (Formicant) for KSP 1.3
+	+ Spanish, Japanese, and Chinese localization added. 
 * 2017-0901: 1.9 (Formicant) for KSP 1.3
 	+ Trim settings added. 
 * 2017-0621: 1.8.1 (Formicant) for KSP 1.3
