@@ -1,5 +1,8 @@
 # AutoAction :: Change Log
 
+* 2016-1023: 1.7 (Formicant) for KSP 1.2
+	+ AutoAction.cfg file renamed to AutoAction.settings to prevent ModuleManager to invalidate the cache.
+	+ Bizzy’s toolbar wrapper updated.
 * 2016-1015: 1.6.3 (Formicant) for KSP 1.2
 	+ Updated to KSP 1.2
 * 2016-0428: 1.6.2 (Formicant) for KSP 1.1.2
