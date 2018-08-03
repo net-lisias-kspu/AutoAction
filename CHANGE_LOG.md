@@ -1,5 +1,7 @@
 # AutoAction :: Change Log
 
+* 2017-0103: 1.7.3 (Formicant) for KSP 1.2.2
+	+ Updated to KSP 1.2.2.
 * 2016-1106: 1.7.2 (Formicant) for KSP 1.2.1
 	+ Updated to KSP 1.2.1. 
 * 2016-1024: 1.7.1 (Formicant) for KSP 1.2
