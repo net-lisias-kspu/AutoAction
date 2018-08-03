@@ -1,5 +1,7 @@
 # AutoAction :: Change Log
 
+* 2016-0422: 1.6.1 (Formicant) for KSP 1.1.2
+	+ KSP 1.1.2 recompile
 * 2015-1119: 1.6 (Diazo) for KSP 1.0.5
 	+ KSP 1.0.5 Update
 	+ No code changes, Squad just moved some stuff in the API I have to update for.
