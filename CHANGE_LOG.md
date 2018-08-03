@@ -1,5 +1,7 @@
 # AutoAction :: Change Log
 
+* 2016-1015: 1.6.3 (Formicant) for KSP 1.2
+	+ Updated to KSP 1.2
 * 2016-0428: 1.6.2 (Formicant) for KSP 1.1.2
 	+ Fix stock toolbar.
 	+ Fix gauge color.
