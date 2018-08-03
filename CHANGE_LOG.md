@@ -1,5 +1,8 @@
 # AutoAction :: Change Log
 
+* 2018-0410: 1.10.0 (Formicant) for KSP 1.3.1 & 1.4.2
+	+ Gear and Light behavior fixed.
+	+ UI layout changed.
 * 2018-0406: 1.9.5 (Formicant) for KSP 1.4.2
 	+ Updated to KSP 1.4.2.
 * 2018-0317: 1.9.4 (Formicant) for KSP 1.4.1
