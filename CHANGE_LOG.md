@@ -1,5 +1,7 @@
 # AutoAction :: Change Log
 
+* 2018-0625: 1.10.2 (Formicant) for KSP 1.4.4
+	+ Updated to KSP 1.4.4.
 * 2018-0410: 1.10.1 (Formicant) for KSP 1.4.3
 	+ Updated to KSP 1.4.3
 * 2018-0410: 1.10.0 (Formicant) for KSP 1.3.1 & 1.4.2
