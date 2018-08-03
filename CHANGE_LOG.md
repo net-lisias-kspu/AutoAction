@@ -1,5 +1,10 @@
 # AutoAction :: Change Log
 
+* 2017-0606: 1.8 (Formicant) for KSP 1.3
+	+ Updated to KSP 1.3.
+	+ Localization support added.
+	+ Russian GUI added.
+	+ Code refactoring.
 * 2017-0103: 1.7.3 (Formicant) for KSP 1.2.2
 	+ Updated to KSP 1.2.2.
 * 2016-1106: 1.7.2 (Formicant) for KSP 1.2.1
