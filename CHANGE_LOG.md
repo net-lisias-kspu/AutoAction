@@ -1,5 +1,8 @@
 # AutoAction :: Change Log
 
+* 2014-1226: 1.3 (Diazo) for KSP 0.90
+	+ Add Precise Control option
+	+ Fix Override Career flag added in previous version so it actually works.
 * 2014-1224: 1.2.1 (Diazo) for KSP 0.90
 	+ Add ability to override career mode lockout on action groups so this mod will show even if action groups are not yet unlocked.
 	+ Note that only shows this mod, another mod is required in order actually assign actions in early career mode. (Action Groups Extended is one that does.)
