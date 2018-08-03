@@ -1,5 +1,8 @@
 # AutoAction :: Change Log
 
+* 2018-0317: 1.9.4 (Formicant) for KSP 1.4.1
+	+ Updated to KSP 1.4.1.
+	+ Fixed null exception when displaying the trim section for the first time.
 * 2017-1019: 1.9.3 (Formicant) for KSP 1.3.1
 	+ Exception on Editor to Flight scene change fixed.
 * 2017-1011: 1.9.2 (Formicant) for KSP 1.3.1
