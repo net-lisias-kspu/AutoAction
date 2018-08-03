@@ -1,6 +1,4 @@
 .vs
-Releases
+Archive
 AutoAction/obj
-AutoAction/bin
-*.suo
-*.user
+bin
