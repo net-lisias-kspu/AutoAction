@@ -1,5 +1,9 @@
 # AutoAction :: Change Log
 
+* 2016-0428: 1.6.2 (Formicant) for KSP 1.1.2
+	+ Fix stock toolbar.
+	+ Fix gauge color.
+	+ Separate VAB and SPH defaults. 
 * 2016-0422: 1.6.1 (Formicant) for KSP 1.1.2
 	+ KSP 1.1.2 recompile
 * 2015-1119: 1.6 (Diazo) for KSP 1.0.5
