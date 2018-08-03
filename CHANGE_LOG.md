@@ -1,5 +1,29 @@
 # AutoAction :: Change Log
 
+* 2018-0803: 1.10.3.1 (lisias) for KSP 1.4.x
+	+ Moved Settings file to <KSP_ROOT>/PluginData 
+* 2018-0625: 1.10.3 (Formicant) for KSP 1.4.5
+	+ Updated to KSP 1.4.5.
+* 2018-0625: 1.10.2 (Formicant) for KSP 1.4.4
+	+ Updated to KSP 1.4.4.
+* 2018-0410: 1.10.1 (Formicant) for KSP 1.4.3
+	+ Updated to KSP 1.4.3
+* 2018-0410: 1.10.0 (Formicant) for KSP 1.3.1 & 1.4.2
+	+ Gear and Light behavior fixed.
+	+ UI layout changed.
+* 2018-0406: 1.9.5 (Formicant) for KSP 1.4.2
+	+ Updated to KSP 1.4.2.
+* 2018-0317: 1.9.4 (Formicant) for KSP 1.4.1
+	+ Updated to KSP 1.4.1.
+	+ Fixed null exception when displaying the trim section for the first time.
+* 2017-1019: 1.9.3 (Formicant) for KSP 1.3.1
+	+ Exception on Editor to Flight scene change fixed.
+* 2017-1011: 1.9.2 (Formicant) for KSP 1.3.1
+	+ Updated to KSP 1.3.1
+* 2017-0903: 1.9.1 (Formicant) for KSP 1.3
+	+ Spanish, Japanese, and Chinese localization added. 
+* 2017-0901: 1.9 (Formicant) for KSP 1.3
+	+ Trim settings added. 
 * 2017-0621: 1.8.1 (Formicant) for KSP 1.3
 	+ Spanish, Japanese, and Chinese translations added.
 * 2017-0606: 1.8 (Formicant) for KSP 1.3
