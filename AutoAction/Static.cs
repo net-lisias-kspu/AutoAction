@@ -8,10 +8,10 @@ namespace AutoAction
 	static class Static
 	{
 		static readonly string FullModFolderPath = KSPUtil.ApplicationRootPath + "GameData/AutoAction/";
+		public static readonly string PluginDataFolderPath = KSPUtil.ApplicationRootPath + "PluginData/AutoAction/";
 
 		public static readonly string TextureFolderPath = FullModFolderPath + "Textures/";
-
-		public static readonly string SettingsFilePath = FullModFolderPath + "AutoAction.settings";
+		public static readonly string SettingsFilePath = PluginDataFolderPath + "AutoAction.settings";
 
 
 		// Conversion extension methods

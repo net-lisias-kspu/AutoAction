@@ -427,6 +427,7 @@ namespace AutoAction
 			_settings.SetValue(_facilityPrefix + "setThrottle", _defaultSetThrottle.ToStringValue(), true);
 			_settings.SetValue(_facilityPrefix + "setPrecCtrl", _defaultSetPrecCtrl.ToStringValue(), true);
 
+			if (!Directory.Exists(Static.PluginDataFolderPath)) Directory.CreateDirectory(Static.PluginDataFolderPath);
 			_settings.Save(Static.SettingsFilePath);
 		}
 
