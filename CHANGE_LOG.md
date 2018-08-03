@@ -1,5 +1,8 @@
 # AutoAction :: Change Log
 
+* 2015-0625: 1.5 (Diazo) for KSP 1.0.4
+	+ KSP 1.0.4
+	+ Fix a rare NullRef
 * 2015-0428: 1.4 (Diazo) for KSP 1.0
 	+ KSP 1.0 Update
 * 2014-1226: 1.3 (Diazo) for KSP 0.90
