@@ -1,5 +1,8 @@
 # AutoAction :: Change Log
 
+* 2015-1119: 1.6 (Diazo) for KSP 1.0.5
+	+ KSP 1.0.5 Update
+	+ No code changes, Squad just moved some stuff in the API I have to update for.
 * 2015-0625: 1.5 (Diazo) for KSP 1.0.4
 	+ KSP 1.0.4
 	+ Fix a rare NullRef
