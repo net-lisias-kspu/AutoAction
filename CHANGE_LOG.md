@@ -1,5 +1,7 @@
 # AutoAction :: Change Log
 
+* 2016-1106: 1.7.2 (Formicant) for KSP 1.2.1
+	+ Updated to KSP 1.2.1. 
 * 2016-1024: 1.7.1 (Formicant) for KSP 1.2
 	+ Licence added.
 	+ .version file added.
