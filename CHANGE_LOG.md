@@ -1,5 +1,7 @@
 # AutoAction :: Change Log
 
+* 2018-0803: 1.10.3.1 (lisias) for KSP 1.4.x
+	+ Moved Settings file to <KSP_ROOT>/PluginData 
 * 2018-0625: 1.10.3 (Formicant) for KSP 1.4.5
 	+ Updated to KSP 1.4.5.
 * 2018-0625: 1.10.2 (Formicant) for KSP 1.4.4
