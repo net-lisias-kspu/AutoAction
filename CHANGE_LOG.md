@@ -1,5 +1,9 @@
 # AutoAction :: Change Log
 
+* 2016-1024: 1.7.1 (Formicant) for KSP 1.2
+	+ Licence added.
+	+ .version file added.
+	+ .netkan file updated.
 * 2016-1023: 1.7 (Formicant) for KSP 1.2
 	+ AutoAction.cfg file renamed to AutoAction.settings to prevent ModuleManager to invalidate the cache.
 	+ Bizzy’s toolbar wrapper updated.
