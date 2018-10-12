@@ -4,11 +4,6 @@
 	"URL"		: "https://github.com/net-lisias-kspu/AutoAction/AutoAction.version",
 	"CHANGE_LOG"	: "https://github.com/net-lisias-kspu/AutoAction/CHANGE_LOG.md",
 	"CHANGE_LOG_URL": "https://github.com/net-lisias-kspu/AutoAction/CHANGES.md",
-	"GITHUB":{
-		"USERNAME"   : "net-lisias-kspu",
-		"REPOSITORY" : "AutoAction",
-		"ALLOW_PRE_RELEASE" : false
-		},
 	"VERSION":{
 		"MAJOR":1,
 		"MINOR":10,
@@ -17,17 +12,16 @@
 		},
 	"KSP_VERSION":{
 		"MAJOR":1,
-		"MINOR":4,
-		"PATCH":5
+		"MINOR":4
 		},
 	"KSP_VERSION_MIN":{
 		"MAJOR":1,
 		"MINOR":4,
-		"PATCH":0
+		"PATCH":1
 		},
 	"KSP_VERSION_MAX":{
 		"MAJOR":1,
 		"MINOR":4,
-		"PATCH":5
-		},
+		"PATCH":99
+		}
 }
