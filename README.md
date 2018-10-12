@@ -6,8 +6,8 @@ KSP plugin for automatic action groups activation on launch. Unofficial fork by 
 ## In a Hurry
 
 * [Latest Release](https://github.com/net-lisias-kspu/AutoAction/releases)
+    + [Binaries](https://github.com/net-lisias-kspu/AutoAction/tree/Archive)
 * [Source](https://github.com/net-lisias-kspu/AutoAction)
-* [Binaries](https://github.com/net-lisias-kspu/AutoAction/tree/Archive)
 * [Change Log](./CHANGE_LOG.md)
 
 
