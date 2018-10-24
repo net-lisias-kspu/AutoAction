@@ -11,8 +11,6 @@ namespace AutoAction
 	{
 		bool _defaultActivateAbort;
 		bool _defaultActivateBrakes;
-		//bool _defaultActivateGear = true;
-		//bool _defaultActivateLights;
 		bool _defaultActivateRcs;
 		bool _defaultActivateSas;
 		int _defaultSetThrottle;
@@ -24,18 +22,18 @@ namespace AutoAction
 
 		public void Start()
 		{
-			var facilityPrefix = ShipConstruction.ShipType == EditorFacility.SPH ? "SPH" : "VAB";
+			var facilityName = ShipConstruction.ShipType == EditorFacility.SPH ? "SPH" : "VAB";
 
 			// Load defaults from .settings file
-			var settings = ConfigNode.Load(Static.SettingsFilePath);
-			_defaultActivateAbort = settings.GetValue(facilityPrefix + "activateAbort").ParseNullableBool() ?? false;
-			_defaultActivateBrakes = settings.GetValue(facilityPrefix + "activateBrakes").ParseNullableBool() ?? false;
-			//_defaultActivateGear = settings.GetValue(facilityPrefix + "activateGear").ParseNullableBool(invertedCompatibilityValue: true) ?? true;
-			//_defaultActivateLights = settings.GetValue(facilityPrefix + "activateLights").ParseNullableBool() ?? false;
-			_defaultActivateRcs = settings.GetValue(facilityPrefix + "activateRCS").ParseNullableBool() ?? false;
-			_defaultActivateSas = settings.GetValue(facilityPrefix + "activateSAS").ParseNullableBool() ?? false;
-			_defaultSetThrottle = settings.GetValue(facilityPrefix + "setThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
-			_defaultSetPrecCtrl = settings.GetValue(facilityPrefix + "setPrecCtrl").ParseNullableBool() ?? false;
+			var settings = ConfigNode.Load(Static.SettingsFilePath) ?? new ConfigNode();
+
+			var facilityDefaults = settings.GetNode(facilityName) ?? new ConfigNode();
+			_defaultActivateAbort = facilityDefaults.GetValue("ActivateAbort").ParseNullableBool() ?? false;
+			_defaultActivateBrakes = facilityDefaults.GetValue("ActivateBrakes").ParseNullableBool() ?? false;
+			_defaultActivateRcs = facilityDefaults.GetValue("ActivateRCS").ParseNullableBool() ?? false;
+			_defaultActivateSas = facilityDefaults.GetValue("ActivateSAS").ParseNullableBool() ?? false;
+			_defaultSetThrottle = facilityDefaults.GetValue("SetThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
+			_defaultSetPrecCtrl = facilityDefaults.GetValue("SetPrecCtrl").ParseNullableBool() ?? false;
 
 			_flightHandler = FlightInputHandler.fetch;
 		}

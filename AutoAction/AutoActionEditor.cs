@@ -17,13 +17,14 @@ namespace AutoAction
 		bool _isTrimSectionExpanded;
 		bool _isDefaultsSectionExpanded;
 
-		Rect _windowRectangle = new Rect(100, 100, InitialWindowWidth, InitialWindowHeight);
+		Vector2 _windowPosition = DefaultWindowPosition;
+		Rect _windowRectangle = new Rect(DefaultWindowPosition, InitialWindowSize);
 
-		string _facilityPrefix;
+		string _facilityName;
+
+		bool _overrideCareer;
 
 		bool _defaultActivateAbort;
-		//bool _defaultActivateGear = true;
-		//bool _defaultActivateLights;
 		bool _defaultActivateBrakes;
 		bool _defaultActivateRcs;
 		bool _defaultActivateSas;
@@ -43,11 +44,6 @@ namespace AutoAction
 		int? _activateGroupE;
 		int? _setThrottle;
 		bool? _setPrecCtrl;
-		//int _setPitchTrim;
-		//int _setYawTrim;
-		//int _setRollTrim;
-		//int _setWheelMotorTrim;
-		//int _setWheelSteerTrim;
 		string _setPitchTrimString;
 		string _setYawTrimString;
 		string _setRollTrimString;
@@ -63,7 +59,7 @@ namespace AutoAction
 			GameEvents.onEditorLoad.Add(OnShipLoad);
 
 			bool isVab = EditorDriver.editorFacility == EditorFacility.VAB;
-			_facilityPrefix = isVab ? "VAB" : "SPH";
+			_facilityName = isVab ? "VAB" : "SPH";
 
 			LoadDefaultSettings();
 			LoadPartModule();
@@ -104,6 +100,11 @@ namespace AutoAction
 			{
 				//_windowRectangle.height = _isWindowExpanded ? ExpandedWindowHeight : CollapsedWindowHeight;
 				_windowRectangle = GUI.Window(WindowId, _windowRectangle, DrawWindow, Localizer.Format("#ModAutoAction_Title"), WindowStyle);
+				if(_windowPosition != _windowRectangle.position)
+				{
+					_windowPosition = _windowRectangle.position;
+					SaveDefaultSettings();
+				}
 			}
 		}
 
@@ -112,10 +113,10 @@ namespace AutoAction
 			int windowHeight = 23;
 
 			// Get window width from localization
-			int windowWidth =
+			float windowWidth =
 				int.TryParse(Localizer.GetStringByTag("#ModAutoAction_WindowWidth"), out int localizationWindowWidth)
 					? localizationWindowWidth
-					: InitialWindowWidth;
+					: InitialWindowSize.x;
 			// Relative width unit
 			float unit = (windowWidth - 10F) / 20F;
 
@@ -198,7 +199,7 @@ namespace AutoAction
 
 			// Default settings
 
-			Label(0, 20, 0, _facilityPrefix == "VAB" ? "#ModAutoAction_VabDefaults" : "#ModAutoAction_SphDefaults");
+			Label(0, 20, 0, _facilityName == "VAB" ? "#ModAutoAction_VabDefaults" : "#ModAutoAction_SphDefaults");
 			ExpandButton(ref _isDefaultsSectionExpanded);
 			windowHeight += 22;
 
@@ -398,34 +399,41 @@ namespace AutoAction
 
 		void LoadDefaultSettings()
 		{
-			_settings = ConfigNode.Load(Static.SettingsFilePath);
+			_settings = ConfigNode.Load(Static.SettingsFilePath) ?? new ConfigNode();
 
-			_windowRectangle.x = _settings.GetValue("WinX").ParseNullableInt() ?? 0;
-			_windowRectangle.y = _settings.GetValue("WinY").ParseNullableInt() ?? 0;
+			_overrideCareer = _settings.GetValue("OverrideCareer").ParseNullableBool() ?? false;
 
-			_defaultActivateAbort = _settings.GetValue(_facilityPrefix + "activateAbort").ParseNullableBool() ?? false;
-			_defaultActivateBrakes = _settings.GetValue(_facilityPrefix + "activateBrakes").ParseNullableBool() ?? false;
-			//_defaultActivateGear = _settings.GetValue(_facilityPrefix + "activateGear").ParseNullableBool(invertedCompatibilityValue: true) ?? true;
-			//_defaultActivateLights = _settings.GetValue(_facilityPrefix + "activateLights").ParseNullableBool() ?? false;
-			_defaultActivateRcs = _settings.GetValue(_facilityPrefix + "activateRCS").ParseNullableBool() ?? false;
-			_defaultActivateSas = _settings.GetValue(_facilityPrefix + "activateSAS").ParseNullableBool() ?? false;
-			_defaultSetThrottle = _settings.GetValue(_facilityPrefix + "setThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
-			_defaultSetPrecCtrl = _settings.GetValue(_facilityPrefix + "setPrecCtrl").ParseNullableBool() ?? false;
+			var windowPosition = _settings.GetNode("WindowPosition") ?? new ConfigNode();
+			_windowPosition.x = windowPosition.GetValue("X").ParseNullableInt() ?? DefaultWindowPosition.x;
+			_windowPosition.y = windowPosition.GetValue("Y").ParseNullableInt() ?? DefaultWindowPosition.y;
+			_windowRectangle.position = _windowPosition;
+
+			var facilityDefaults = _settings.GetNode(_facilityName) ?? new ConfigNode();
+			_defaultActivateAbort = facilityDefaults.GetValue("ActivateAbort").ParseNullableBool() ?? false;
+			_defaultActivateBrakes = facilityDefaults.GetValue("ActivateBrakes").ParseNullableBool() ?? false;
+			_defaultActivateRcs = facilityDefaults.GetValue("ActivateRCS").ParseNullableBool() ?? false;
+			_defaultActivateSas = facilityDefaults.GetValue("ActivateSAS").ParseNullableBool() ?? false;
+			_defaultSetThrottle = facilityDefaults.GetValue("SetThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
+			_defaultSetPrecCtrl = facilityDefaults.GetValue("SetPrecCtrl").ParseNullableBool() ?? false;
 		}
 
 		void SaveDefaultSettings()
 		{
-			_settings.SetValue("WinX", _windowRectangle.x.ToStringValue(), true);
-			_settings.SetValue("WinY", _windowRectangle.y.ToStringValue(), true);
+			_settings.SetValue("OverrideCareer", _overrideCareer.ToStringValue(), true);
 
-			_settings.SetValue(_facilityPrefix + "activateAbort", _defaultActivateAbort.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "activateBrakes", _defaultActivateBrakes.ToStringValue(), true);
-			//_settings.SetValue(_facilityPrefix + "activateGear", _defaultActivateGear.ToStringValue(), true);
-			//_settings.SetValue(_facilityPrefix + "activateLights", _defaultActivateLights.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "activateRCS", _defaultActivateRcs.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "activateSAS", _defaultActivateSas.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "setThrottle", _defaultSetThrottle.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "setPrecCtrl", _defaultSetPrecCtrl.ToStringValue(), true);
+			var windowPosition = new ConfigNode("WindowPosition");
+			windowPosition.SetValue("X", _windowPosition.x.ToStringValue(), true);
+			windowPosition.SetValue("Y", _windowPosition.y.ToStringValue(), true);
+			_settings.SetNode(windowPosition.name, windowPosition, true);
+
+			var facilityDefaults = new ConfigNode(_facilityName);
+			facilityDefaults.SetValue("ActivateAbort", _defaultActivateAbort.ToStringValue(), true);
+			facilityDefaults.SetValue("ActivateBrakes", _defaultActivateBrakes.ToStringValue(), true);
+			facilityDefaults.SetValue("ActivateRCS", _defaultActivateRcs.ToStringValue(), true);
+			facilityDefaults.SetValue("ActivateSAS", _defaultActivateSas.ToStringValue(), true);
+			facilityDefaults.SetValue("SetThrottle", _defaultSetThrottle.ToStringValue(), true);
+			facilityDefaults.SetValue("SetPrecCtrl", _defaultSetPrecCtrl.ToStringValue(), true);
+			_settings.SetNode(facilityDefaults.name, facilityDefaults, true);
 
 			_settings.Save(Static.SettingsFilePath);
 		}
@@ -493,10 +501,10 @@ namespace AutoAction
 		static readonly GUIStyle OffButtonStyle = GetButtonStyle(LoadTexture("ButtonTextureRed"));
 		static readonly GUIStyle OnButtonStyle = GetButtonStyle(LoadTexture("ButtonTextureGreen"));
 
-		const int InitialWindowWidth = 160;
-		const int InitialWindowHeight = 175;
+		static readonly Vector2 DefaultWindowPosition = new Vector2(431, 25);
+		static readonly Vector2 InitialWindowSize = new Vector2(160, 175);
 
-		const int WindowId = 67347792;
+		static readonly int WindowId = nameof(AutoAction).GetHashCode();
 	}
 }
 
