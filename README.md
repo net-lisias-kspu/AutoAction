@@ -6,9 +6,13 @@ KSP plugin for automatic action groups activation on launch. Unofficial fork by 
 ## In a Hurry
 
 * [Latest Release](https://github.com/net-lisias-kspu/AutoAction/releases)
-    + [Binaries](https://github.com/net-lisias-kspu/AutoAction/tree/Archive)
+	+ [Binaries](https://github.com/net-lisias-kspu/AutoAction/tree/Archive)
 * [Source](https://github.com/net-lisias-kspu/AutoAction)
-* [Change Log](./CHANGE_LOG.md)
+* Documentation
+	+ [Project's README](https://github.com/net-lisias-kspu/AutoAction/blob/master/README.md)
+	+ [Install Instructions](https://github.com/net-lisias-kspu/AutoAction/blob/master/INSTALL.md)
+	+ [Change Log](./CHANGE_LOG.md)
+	+ [TODO](./TODO.md) list
 
 
 ## Description
@@ -43,16 +47,8 @@ You can control the initial state of:
 
 ## Installation
 
-To install, place the GameData folder inside your Kerbal Space Program folder.
+Detailed installation instructions are now on its own file (see the [In a Hurry](#in-a-hurry) section) and on the distribution file.
 
-**REMOVE ANY OLD VERSIONS OF THE PRODUCT BEFORE INSTALLING**.
-
-### Dependencies
-<!--
-* Hard Dependencies:
-	+ [KSP API Extensions/L](https://github.com/net-lisias-ksp/KSPAPIExtensions)
--->
-None at the moment. :)
 
 ### Licensing
 This work is licensed under [GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.txt). See [here](./LICENSE)
