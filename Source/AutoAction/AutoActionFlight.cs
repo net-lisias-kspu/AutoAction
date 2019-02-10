@@ -22,12 +22,13 @@ namespace AutoAction
 
 		public void Start()
 		{
-			var facilityName = ShipConstruction.ShipType == EditorFacility.SPH ? "SPH" : "VAB";
+            string facilityName = ShipConstruction.ShipType == EditorFacility.SPH ? "SPH" : "VAB";
 
 			// Load defaults from .settings file
-			var settings = ConfigNode.Load(Static.SettingsFilePath) ?? new ConfigNode();
+            if (Static.SETTINGS_FILE.IsLoadable) Static.SETTINGS_FILE.Load();
+            ConfigNode settings = Static.SETTINGS_FILE.Node;
 
-			var facilityDefaults = settings.GetNode(facilityName) ?? new ConfigNode();
+            ConfigNode facilityDefaults = settings.GetNode(facilityName) ?? new ConfigNode();
 			_defaultActivateAbort = facilityDefaults.GetValue("ActivateAbort").ParseNullableBool() ?? false;
 			_defaultActivateBrakes = facilityDefaults.GetValue("ActivateBrakes").ParseNullableBool() ?? false;
 			_defaultActivateRcs = facilityDefaults.GetValue("ActivateRCS").ParseNullableBool() ?? false;

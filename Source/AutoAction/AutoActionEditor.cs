@@ -399,7 +399,10 @@ namespace AutoAction
 
 		void LoadDefaultSettings()
 		{
-			_settings = ConfigNode.Load(Static.SettingsFilePath) ?? new ConfigNode();
+            if (Static.SETTINGS_FILE.IsLoadable)
+                Static.SETTINGS_FILE.Load();
+
+            _settings = Static.SETTINGS_FILE.Node;
 
 			_overrideCareer = _settings.GetValue("OverrideCareer").ParseNullableBool() ?? false;
 
@@ -435,8 +438,7 @@ namespace AutoAction
 			facilityDefaults.SetValue("SetPrecCtrl", _defaultSetPrecCtrl.ToStringValue(), true);
 			_settings.SetNode(facilityDefaults.name, facilityDefaults, true);
 
-			if (!Directory.Exists(Static.PluginDataFolderPath)) Directory.CreateDirectory(Static.PluginDataFolderPath);
-			_settings.Save(Static.SettingsFilePath);
+			Static.SETTINGS_FILE.Save();
 		}
 
 		GUIStyle GetButtonStyleByValue(bool? value) =>
@@ -454,10 +456,10 @@ namespace AutoAction
 				hover = { background = texture },
 			};
 
-		static Texture2D LoadTexture(string teaxtureName)
+		static Texture2D LoadTexture(string textureName)
 		{
-			var texture = new Texture2D(64, 64);
-			texture.LoadImage(File.ReadAllBytes(Static.TextureFolderPath + teaxtureName + ".png"));
+            Texture2D texture = new Texture2D(64, 64);
+			texture.LoadImage(File.ReadAllBytes(KSPe.IO.File<AutoActionEditor>.Asset.Solve(Path.Combine("Textures", textureName + ".png"))));
 			texture.Apply();
 			return texture;
 		}
