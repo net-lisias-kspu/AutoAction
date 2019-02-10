@@ -1,4 +1,4 @@
-# Auto Actions Unofficial
+# Auto Actions /L Unofficial
 
 KSP plugin for automatic action groups activation on launch. Unofficial fork by Lisias.
 
@@ -66,9 +66,10 @@ This work is licensed under [GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.txt).
 	- You recognize and respect any trademarks
 	- You don't impersonate the authors, neither redistribute a derivative that could be misrepresented as theirs.
 	- You credit the author and republish the copyright notices on your works where the code is used.
-	- You relicense (and fully comply) your works using GPL 2.0 (or later)
+	- You relicense (and fully comply) your works using GPL 3.0 (or later)
 	- You don't mix your work with GPL incompatible works.
 
+Please note the copyrights and trademarks in [NOTICE](./NOTICE).
 
 ## UPSTREAM
 
