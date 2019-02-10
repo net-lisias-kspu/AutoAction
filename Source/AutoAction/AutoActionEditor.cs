@@ -25,8 +25,6 @@ namespace AutoAction
 		bool _overrideCareer;
 
 		bool _defaultActivateAbort;
-		//bool _defaultActivateGear = true;
-		//bool _defaultActivateLights;
 		bool _defaultActivateBrakes;
 		bool _defaultActivateRcs;
 		bool _defaultActivateSas;
@@ -46,11 +44,6 @@ namespace AutoAction
 		int? _activateGroupE;
 		int? _setThrottle;
 		bool? _setPrecCtrl;
-		//int _setPitchTrim;
-		//int _setYawTrim;
-		//int _setRollTrim;
-		//int _setWheelMotorTrim;
-		//int _setWheelSteerTrim;
 		string _setPitchTrimString;
 		string _setYawTrimString;
 		string _setRollTrimString;
