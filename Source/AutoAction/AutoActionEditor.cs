@@ -17,7 +17,8 @@ namespace AutoAction
 		bool _isTrimSectionExpanded;
 		bool _isDefaultsSectionExpanded;
 
-		Rect _windowRectangle = new Rect(100, 100, InitialWindowWidth, InitialWindowHeight);
+		Vector2 _windowPosition = DefaultWindowPosition;
+		Rect _windowRectangle = new Rect(DefaultWindowPosition, InitialWindowSize);
 
 		string _facilityName;
 
@@ -106,6 +107,11 @@ namespace AutoAction
 			{
 				//_windowRectangle.height = _isWindowExpanded ? ExpandedWindowHeight : CollapsedWindowHeight;
 				_windowRectangle = GUI.Window(WindowId, _windowRectangle, DrawWindow, Localizer.Format("#ModAutoAction_Title"), WindowStyle);
+				if(_windowPosition != _windowRectangle.position)
+				{
+					_windowPosition = _windowRectangle.position;
+					SaveDefaultSettings();
+				}
 			}
 		}
 
@@ -114,10 +120,10 @@ namespace AutoAction
 			int windowHeight = 23;
 
 			// Get window width from localization
-			int windowWidth =
+			float windowWidth =
 				int.TryParse(Localizer.GetStringByTag("#ModAutoAction_WindowWidth"), out int localizationWindowWidth)
 					? localizationWindowWidth
-					: InitialWindowWidth;
+					: InitialWindowSize.x;
 			// Relative width unit
 			float unit = (windowWidth - 10F) / 20F;
 
@@ -402,9 +408,12 @@ namespace AutoAction
 		{
 			_settings = ConfigNode.Load(Static.SettingsFilePath) ?? new ConfigNode();
 
-			_windowRectangle.x = _settings.GetValue("WinX").ParseNullableInt() ?? 0;
-			_windowRectangle.y = _settings.GetValue("WinY").ParseNullableInt() ?? 0;
 			_overrideCareer = _settings.GetValue("OverrideCareer").ParseNullableBool() ?? false;
+
+			var windowPosition = _settings.GetNode("WindowPosition") ?? new ConfigNode();
+			_windowPosition.x = windowPosition.GetValue("X").ParseNullableInt() ?? DefaultWindowPosition.x;
+			_windowPosition.y = windowPosition.GetValue("Y").ParseNullableInt() ?? DefaultWindowPosition.y;
+			_windowRectangle.position = _windowPosition;
 
 			var facilityDefaults = _settings.GetNode(_facilityName) ?? new ConfigNode();
 			_defaultActivateAbort = facilityDefaults.GetValue("ActivateAbort").ParseNullableBool() ?? false;
@@ -417,9 +426,12 @@ namespace AutoAction
 
 		void SaveDefaultSettings()
 		{
-			_settings.SetValue("WinX", _windowRectangle.x.ToStringValue(), true);
-			_settings.SetValue("WinY", _windowRectangle.y.ToStringValue(), true);
 			_settings.SetValue("OverrideCareer", _overrideCareer.ToStringValue(), true);
+
+			var windowPosition = new ConfigNode("WindowPosition");
+			windowPosition.SetValue("X", _windowPosition.x.ToStringValue(), true);
+			windowPosition.SetValue("Y", _windowPosition.y.ToStringValue(), true);
+			_settings.SetNode(windowPosition.name, windowPosition, true);
 
 			var facilityDefaults = new ConfigNode(_facilityName);
 			facilityDefaults.SetValue("ActivateAbort", _defaultActivateAbort.ToStringValue(), true);
@@ -497,10 +509,10 @@ namespace AutoAction
 		static readonly GUIStyle OffButtonStyle = GetButtonStyle(LoadTexture("ButtonTextureRed"));
 		static readonly GUIStyle OnButtonStyle = GetButtonStyle(LoadTexture("ButtonTextureGreen"));
 
-		const int InitialWindowWidth = 160;
-		const int InitialWindowHeight = 175;
+		static readonly Vector2 DefaultWindowPosition = new Vector2(431, 25);
+		static readonly Vector2 InitialWindowSize = new Vector2(160, 175);
 
-		const int WindowId = 67347792;
+		static readonly int WindowId = nameof(AutoAction).GetHashCode();
 	}
 }
 
