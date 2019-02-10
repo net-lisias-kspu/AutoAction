@@ -19,7 +19,7 @@ namespace AutoAction
 
 		Rect _windowRectangle = new Rect(100, 100, InitialWindowWidth, InitialWindowHeight);
 
-		string _facilityPrefix;
+		string _facilityName;
 
 		bool _defaultActivateAbort;
 		//bool _defaultActivateGear = true;
@@ -63,7 +63,7 @@ namespace AutoAction
 			GameEvents.onEditorLoad.Add(OnShipLoad);
 
 			bool isVab = EditorDriver.editorFacility == EditorFacility.VAB;
-			_facilityPrefix = isVab ? "VAB" : "SPH";
+			_facilityName = isVab ? "VAB" : "SPH";
 
 			LoadDefaultSettings();
 			LoadPartModule();
@@ -198,7 +198,7 @@ namespace AutoAction
 
 			// Default settings
 
-			Label(0, 20, 0, _facilityPrefix == "VAB" ? "#ModAutoAction_VabDefaults" : "#ModAutoAction_SphDefaults");
+			Label(0, 20, 0, _facilityName == "VAB" ? "#ModAutoAction_VabDefaults" : "#ModAutoAction_SphDefaults");
 			ExpandButton(ref _isDefaultsSectionExpanded);
 			windowHeight += 22;
 
@@ -398,19 +398,19 @@ namespace AutoAction
 
 		void LoadDefaultSettings()
 		{
-			_settings = ConfigNode.Load(Static.SettingsFilePath);
+			_settings = ConfigNode.Load(Static.SettingsFilePath) ?? new ConfigNode();
 
 			_windowRectangle.x = _settings.GetValue("WinX").ParseNullableInt() ?? 0;
 			_windowRectangle.y = _settings.GetValue("WinY").ParseNullableInt() ?? 0;
+			_overrideCareer = _settings.GetValue("OverrideCareer").ParseNullableBool() ?? false;
 
-			_defaultActivateAbort = _settings.GetValue(_facilityPrefix + "activateAbort").ParseNullableBool() ?? false;
-			_defaultActivateBrakes = _settings.GetValue(_facilityPrefix + "activateBrakes").ParseNullableBool() ?? false;
-			//_defaultActivateGear = _settings.GetValue(_facilityPrefix + "activateGear").ParseNullableBool(invertedCompatibilityValue: true) ?? true;
-			//_defaultActivateLights = _settings.GetValue(_facilityPrefix + "activateLights").ParseNullableBool() ?? false;
-			_defaultActivateRcs = _settings.GetValue(_facilityPrefix + "activateRCS").ParseNullableBool() ?? false;
-			_defaultActivateSas = _settings.GetValue(_facilityPrefix + "activateSAS").ParseNullableBool() ?? false;
-			_defaultSetThrottle = _settings.GetValue(_facilityPrefix + "setThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
-			_defaultSetPrecCtrl = _settings.GetValue(_facilityPrefix + "setPrecCtrl").ParseNullableBool() ?? false;
+			var facilityDefaults = _settings.GetNode(_facilityName) ?? new ConfigNode();
+			_defaultActivateAbort = facilityDefaults.GetValue("ActivateAbort").ParseNullableBool() ?? false;
+			_defaultActivateBrakes = facilityDefaults.GetValue("ActivateBrakes").ParseNullableBool() ?? false;
+			_defaultActivateRcs = facilityDefaults.GetValue("ActivateRCS").ParseNullableBool() ?? false;
+			_defaultActivateSas = facilityDefaults.GetValue("ActivateSAS").ParseNullableBool() ?? false;
+			_defaultSetThrottle = facilityDefaults.GetValue("SetThrottle").ParseNullableInt(minValue: 0, maxValue: 100) ?? 0;
+			_defaultSetPrecCtrl = facilityDefaults.GetValue("SetPrecCtrl").ParseNullableBool() ?? false;
 		}
 
 		void SaveDefaultSettings()
@@ -418,14 +418,14 @@ namespace AutoAction
 			_settings.SetValue("WinX", _windowRectangle.x.ToStringValue(), true);
 			_settings.SetValue("WinY", _windowRectangle.y.ToStringValue(), true);
 
-			_settings.SetValue(_facilityPrefix + "activateAbort", _defaultActivateAbort.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "activateBrakes", _defaultActivateBrakes.ToStringValue(), true);
-			//_settings.SetValue(_facilityPrefix + "activateGear", _defaultActivateGear.ToStringValue(), true);
-			//_settings.SetValue(_facilityPrefix + "activateLights", _defaultActivateLights.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "activateRCS", _defaultActivateRcs.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "activateSAS", _defaultActivateSas.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "setThrottle", _defaultSetThrottle.ToStringValue(), true);
-			_settings.SetValue(_facilityPrefix + "setPrecCtrl", _defaultSetPrecCtrl.ToStringValue(), true);
+			var facilityDefaults = new ConfigNode(_facilityName);
+			facilityDefaults.SetValue("ActivateAbort", _defaultActivateAbort.ToStringValue(), true);
+			facilityDefaults.SetValue("ActivateBrakes", _defaultActivateBrakes.ToStringValue(), true);
+			facilityDefaults.SetValue("ActivateRCS", _defaultActivateRcs.ToStringValue(), true);
+			facilityDefaults.SetValue("ActivateSAS", _defaultActivateSas.ToStringValue(), true);
+			facilityDefaults.SetValue("SetThrottle", _defaultSetThrottle.ToStringValue(), true);
+			facilityDefaults.SetValue("SetPrecCtrl", _defaultSetPrecCtrl.ToStringValue(), true);
+			_settings.SetNode(facilityDefaults.name, facilityDefaults, true);
 
 			if (!Directory.Exists(Static.PluginDataFolderPath)) Directory.CreateDirectory(Static.PluginDataFolderPath);
 			_settings.Save(Static.SettingsFilePath);
