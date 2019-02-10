@@ -21,6 +21,8 @@ namespace AutoAction
 
 		string _facilityName;
 
+		bool _overrideCareer;
+
 		bool _defaultActivateAbort;
 		//bool _defaultActivateGear = true;
 		//bool _defaultActivateLights;
@@ -417,6 +419,7 @@ namespace AutoAction
 		{
 			_settings.SetValue("WinX", _windowRectangle.x.ToStringValue(), true);
 			_settings.SetValue("WinY", _windowRectangle.y.ToStringValue(), true);
+			_settings.SetValue("OverrideCareer", _overrideCareer.ToStringValue(), true);
 
 			var facilityDefaults = new ConfigNode(_facilityName);
 			facilityDefaults.SetValue("ActivateAbort", _defaultActivateAbort.ToStringValue(), true);
