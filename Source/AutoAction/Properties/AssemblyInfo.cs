@@ -35,3 +35,5 @@ using System.Runtime.InteropServices;
 // non-hacky way in KSP.  Format is (AssemblyProduct, major, minor), and it 
 // does not appear to have a hard requirement to match the assembly version. 
 [assembly: KSPAssembly("AutoAction", AutoAction.Version.major, AutoAction.Version.minor)]
+
+[assembly: KSPAssemblyDependency("KSPe", 2, 1)]

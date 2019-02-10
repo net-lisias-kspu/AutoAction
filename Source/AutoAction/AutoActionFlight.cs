@@ -69,7 +69,7 @@ namespace AutoAction
 			}
 			catch
 			{
-				print("AutoAction Error: Safe to ignore if you did not just launch a new vessel.");
+				Log.Error("AutoAction Error: Safe to ignore if you did not just launch a new vessel.");
 			}
 		}
 

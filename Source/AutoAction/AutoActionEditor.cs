@@ -54,7 +54,7 @@ namespace AutoAction
 
 		public void Start()
 		{
-			print($"AutoActions Version {Assembly.GetCallingAssembly().GetName().Version} loaded.");
+			Log.Info("AutoActions Version {0} loaded.", Assembly.GetCallingAssembly().GetName().Version);
 
 			GameEvents.onEditorLoad.Add(OnShipLoad);
 
