@@ -9,9 +9,9 @@ namespace AutoAction
 	{
 		static readonly string FullModFolderPath = KSPUtil.ApplicationRootPath + $"GameData/{nameof(AutoAction)}/";
 
-		public static readonly string TextureFolderPath = FullModFolderPath + "Textures/";
+		public static readonly string TextureFolderPath = nameof(AutoAction) + "/Textures/";
 
-		public static readonly string SettingsFilePath = FullModFolderPath + $"PluginData/{nameof(AutoAction)}.settings";
+		public static readonly string SettingsFilePath = FullModFolderPath + $"Plugins/PluginData/{nameof(AutoAction)}.settings";
 
 
 		// Conversion extension methods

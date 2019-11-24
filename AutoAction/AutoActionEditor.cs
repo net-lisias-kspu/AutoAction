@@ -453,13 +453,11 @@ namespace AutoAction
 				hover = { background = texture },
 			};
 
-		static Texture2D LoadTexture(string teaxtureName)
-		{
-			var texture = new Texture2D(64, 64);
-			texture.LoadImage(File.ReadAllBytes(Static.TextureFolderPath + teaxtureName + ".png"));
-			texture.Apply();
-			return texture;
-		}
+		static Texture2D LoadTexture(string teaxtureName) =>
+			GameDatabase.Instance.GetTexture(Static.TextureFolderPath + teaxtureName, asNormalMap: false);
+			// new Texture2D(64, 64);
+			//texture.LoadImage(File.ReadAllBytes( + ".png"));
+			//texture.Apply();
 
 		// Styles
 		static readonly GUISkin Skin = Instantiate(HighLogic.Skin);

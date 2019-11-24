@@ -1,6 +1,6 @@
-.vs
-Releases
-AutoAction/obj
-AutoAction/bin
+/Releases
+/.vs
+/AutoAction/obj
+/AutoAction/bin
 *.suo
 *.user

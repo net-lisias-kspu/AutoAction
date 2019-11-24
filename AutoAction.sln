@@ -1,9 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.28729.10
+VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoAction", "AutoAction\AutoAction.csproj", "{BE801571-AE47-4576-BF4B-9490718DA11E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoAction", "AutoAction\AutoAction.csproj", "{32554553-DAFD-4155-9336-A9142B1F6DC1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FF1D39B9-0A4D-424C-88CE-361EB5304399}"
+	ProjectSection(SolutionItems) = preProject
+		GameData\AutoAction\AutoAction.version = GameData\AutoAction\AutoAction.version
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +16,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BE801571-AE47-4576-BF4B-9490718DA11E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE801571-AE47-4576-BF4B-9490718DA11E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE801571-AE47-4576-BF4B-9490718DA11E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE801571-AE47-4576-BF4B-9490718DA11E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32554553-DAFD-4155-9336-A9142B1F6DC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32554553-DAFD-4155-9336-A9142B1F6DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32554553-DAFD-4155-9336-A9142B1F6DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32554553-DAFD-4155-9336-A9142B1F6DC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {1FC3D230-E326-4C2D-8E25-D93BB8E5AB5E}
+		SolutionGuid = {5DA01F52-4A19-4F51-83DF-7D01B2848C66}
 	EndGlobalSection
 EndGlobal
