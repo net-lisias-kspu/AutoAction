@@ -20,22 +20,25 @@ The following file layout must be present after installation:
 ```
 <KSP_ROOT>
 	[GameData]
-		[AutoAction]
-			[Localisation]
+		[net.lisias.ksp]
+			[AutoAction]
+				[Localisation]
+					...
+				[Patches]
+					...
+				[PluginData]
+					[Textures]
+						...
+				CHANGE_LOG.md
+				LICENSE
+				NOTICE
 				...
-			[Plugins]
-				...
-			[textures]
-				...
-			CHANGE_LOG.md
-			LICENSE
-			NOTICE
-			...
 		000_KSPe.dll
 		...
 	[PluginData]
-		[AutoAction] <may not be present until you run it for the fist time>
-			AutoAction.settings
+		[net.lisias.ksp]
+			[AutoAction] <may not be present until you run it for the fist time>
+				AutoAction.settings
 	KSP.log
 	PartDatabase.cfg
 	...
