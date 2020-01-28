@@ -47,14 +47,14 @@ namespace AutoAction
 				{
 					if(_rootPart != FlightGlobals.ActiveVessel.rootPart)
 					{
-						var autoActionPartModules =
+						IEnumerable<ModuleAutoAction> autoActionPartModules =
 							FlightGlobals.ActiveVessel.parts
 								.SelectMany(part => part.Modules.OfType<ModuleAutoAction>())
 								.Where(module => !module.hasActivated);
 
 						// Only process the first AutoAction part module we find
 						bool moduleFound = false;
-						foreach(var module in autoActionPartModules)
+						foreach(ModuleAutoAction module in autoActionPartModules)
 						{
 							if(!moduleFound)
 							{
@@ -76,7 +76,7 @@ namespace AutoAction
 
 		void ProcessModule(ModuleAutoAction module)
 		{
-			var actionGroups = FlightGlobals.ActiveVessel.ActionGroups;
+			ActionGroupList actionGroups = FlightGlobals.ActiveVessel.ActionGroups;
 			actionGroups.SetGroup(KSPActionGroup.Abort, module.ActivateAbort ?? _defaultActivateAbort);
 			actionGroups.SetGroup(KSPActionGroup.Brakes, module.ActivateBrakes ?? _defaultActivateBrakes);
 			actionGroups.SetGroup(KSPActionGroup.RCS, module.ActivateRcs ?? _defaultActivateRcs);
@@ -115,9 +115,9 @@ namespace AutoAction
 		{
 			_flightHandler.precisionMode = precisionMode;
 			// Change the gauge color
-			var gauges = FindObjectOfType<KSP.UI.Screens.Flight.LinearControlGauges>();
+			KSP.UI.Screens.Flight.LinearControlGauges gauges = FindObjectOfType<KSP.UI.Screens.Flight.LinearControlGauges>();
 			if(gauges != null)
-				foreach(var image in gauges.inputGaugeImages)
+				foreach(UnityEngine.UI.Image image in gauges.inputGaugeImages)
 					image.color = precisionMode
 						? XKCDColors.BrightCyan
 						: XKCDColors.Orange;

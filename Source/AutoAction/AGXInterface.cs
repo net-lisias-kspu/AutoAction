@@ -11,7 +11,7 @@ namespace AutoAction
 		{
 			try
 			{
-				var agxType = Type.GetType(AgxTypeName);
+				Type agxType = Type.GetType(AgxTypeName);
 				return
 					agxType != null &&
 					(bool)agxType.InvokeMember("AGXInstalled", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, null);
@@ -26,7 +26,7 @@ namespace AutoAction
 		{
 			try
 			{
-				var agxType = Type.GetType(AgxTypeName);
+				Type agxType = Type.GetType(AgxTypeName);
 				agxType?.InvokeMember("AGXToggleGroup", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new object[] { group });
 			}
 			catch { }

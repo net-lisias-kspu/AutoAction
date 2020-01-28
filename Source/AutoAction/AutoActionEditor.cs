@@ -75,7 +75,7 @@ namespace AutoAction
 			}
 			else
 			{
-				var editorNormLevel = ScenarioUpgradeableFacilities.GetFacilityLevel(
+				float editorNormLevel = ScenarioUpgradeableFacilities.GetFacilityLevel(
 					isVab
 						? SpaceCenterFacility.VehicleAssemblyBuilding
 						: SpaceCenterFacility.SpaceplaneHangar);
@@ -280,7 +280,7 @@ namespace AutoAction
 
 			void NumberField(float left, float width, int maxLength, Action changeAction, ref int value, int defaultValue, int minValue = int.MinValue, int maxValue = int.MaxValue)
 			{
-				var fieldValue =
+				int fieldValue =
 					GUI.TextField(new Rect(Margin + left * unit, windowHeight, width * unit, 20), value.ToStringValue(), maxLength, TextFieldStyle)
 						.ParseNullableInt(minValue, maxValue) ?? defaultValue;
 				if(fieldValue != value)
@@ -292,7 +292,7 @@ namespace AutoAction
 
 			void NullableNumberField(float left, float width, int maxLength, Action changeAction, ref int? value, int minValue = int.MinValue, int maxValue = int.MaxValue)
 			{
-				var fieldValue =
+				int? fieldValue =
 					GUI.TextField(new Rect(Margin + left * unit, windowHeight, width * unit, 20), value.ToStringValue(nullValue: ""), maxLength, TextFieldStyle)
 						.ParseNullableInt(minValue, maxValue);
 				if(fieldValue != value)
@@ -306,7 +306,7 @@ namespace AutoAction
 			{
 				if(string.IsNullOrEmpty(value))
 					value = defaultValue.ToStringSigned();
-				var fieldValue = GUI.TextField(new Rect(Margin + left * unit, windowHeight, width * unit - 16, 20), value, maxLength, NumberUpDownTextFieldStyle);
+				string fieldValue = GUI.TextField(new Rect(Margin + left * unit, windowHeight, width * unit - 16, 20), value, maxLength, NumberUpDownTextFieldStyle);
 				if(fieldValue != value)
 				{
 					value = fieldValue;
@@ -314,13 +314,13 @@ namespace AutoAction
 				}
 				if(GUI.Button(new Rect(Margin + (left + width) * unit - 16, windowHeight - 1, 16, 11), "▴", DefaultButtonStyle))
 				{
-					var numberValue = fieldValue.ParseNullableInt(minValue, maxValue) ?? defaultValue;
+					int numberValue = fieldValue.ParseNullableInt(minValue, maxValue) ?? defaultValue;
 					value = Math.Min(maxValue, numberValue + 1).ToStringSigned();
 					changeAction();
 				}
 				if(GUI.Button(new Rect(Margin + (left + width) * unit - 16, windowHeight + 10, 16, 11), "▾", DefaultButtonStyle))
 				{
-					var numberValue = fieldValue.ParseNullableInt(minValue, maxValue) ?? defaultValue;
+					int numberValue = fieldValue.ParseNullableInt(minValue, maxValue) ?? defaultValue;
 					value = Math.Max(minValue, numberValue - 1).ToStringSigned();
 					changeAction();
 				}
@@ -331,12 +331,12 @@ namespace AutoAction
 
 		void RefreshPartModules()
 		{
-			var autoActionModules =
+			System.Collections.Generic.IEnumerable<ModuleAutoAction> autoActionModules =
 				EditorLogic.SortedShipList
 					?.SelectMany(part => part.Modules.OfType<ModuleAutoAction>());
 
 			if(autoActionModules != null)
-				foreach(var module in autoActionModules)
+				foreach(ModuleAutoAction module in autoActionModules)
 					RefreshPartModule(module);
 		}
 
@@ -367,7 +367,7 @@ namespace AutoAction
 
 		void LoadPartModule()
 		{
-			var module = EditorLogic.SortedShipList
+			ModuleAutoAction module = EditorLogic.SortedShipList
 				?.SelectMany(part => part.Modules.OfType<ModuleAutoAction>())
 				.FirstOrDefault();
 			if(module != null)
@@ -409,12 +409,12 @@ namespace AutoAction
 
 			_overrideCareer = _settings.GetValue("OverrideCareer").ParseNullableBool() ?? false;
 
-			var windowPosition = _settings.GetNode("WindowPosition") ?? new ConfigNode();
+			ConfigNode windowPosition = _settings.GetNode("WindowPosition") ?? new ConfigNode();
 			_windowPosition.x = windowPosition.GetValue("X").ParseNullableInt() ?? DefaultWindowPosition.x;
 			_windowPosition.y = windowPosition.GetValue("Y").ParseNullableInt() ?? DefaultWindowPosition.y;
 			_windowRectangle.position = _windowPosition;
 
-			var facilityDefaults = _settings.GetNode(_facilityName) ?? new ConfigNode();
+			ConfigNode facilityDefaults = _settings.GetNode(_facilityName) ?? new ConfigNode();
 			_defaultActivateAbort = facilityDefaults.GetValue("ActivateAbort").ParseNullableBool() ?? false;
 			_defaultActivateBrakes = facilityDefaults.GetValue("ActivateBrakes").ParseNullableBool() ?? false;
 			_defaultActivateRcs = facilityDefaults.GetValue("ActivateRCS").ParseNullableBool() ?? false;
@@ -427,12 +427,12 @@ namespace AutoAction
 		{
 			_settings.SetValue("OverrideCareer", _overrideCareer.ToStringValue(), true);
 
-			var windowPosition = new ConfigNode("WindowPosition");
+			ConfigNode windowPosition = new ConfigNode("WindowPosition");
 			windowPosition.SetValue("X", _windowPosition.x.ToStringValue(), true);
 			windowPosition.SetValue("Y", _windowPosition.y.ToStringValue(), true);
 			_settings.SetNode(windowPosition.name, windowPosition, true);
 
-			var facilityDefaults = new ConfigNode(_facilityName);
+			ConfigNode facilityDefaults = new ConfigNode(_facilityName);
 			facilityDefaults.SetValue("ActivateAbort", _defaultActivateAbort.ToStringValue(), true);
 			facilityDefaults.SetValue("ActivateBrakes", _defaultActivateBrakes.ToStringValue(), true);
 			facilityDefaults.SetValue("ActivateRCS", _defaultActivateRcs.ToStringValue(), true);
