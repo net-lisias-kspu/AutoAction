@@ -1,14 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using System.IO;
 using System.Reflection;
 using KSP.Localization;
+
 using static KSP.UI.Screens.CraftBrowserDialog;
+
+using GUI = KSPe.UI.GUI;
 
 namespace AutoAction
 {
+	using Asset = KSPe.IO.Asset<AutoActionEditor>;
+
 	[KSPAddon(KSPAddon.Startup.EditorAny, false)]
 	public class AutoActionEditor : MonoBehaviour
 	{
@@ -458,10 +461,7 @@ namespace AutoAction
 
 		static Texture2D LoadTexture(string textureName)
 		{
-            Texture2D texture = new Texture2D(64, 64);
-			texture.LoadImage(File.ReadAllBytes(KSPe.IO.File<AutoActionEditor>.Asset.Solve(Path.Combine("Textures", textureName + ".png"))));
-			texture.Apply();
-			return texture;
+			return Asset.Texture2D.LoadFromFile("Textures", textureName);
 		}
 
 		// Styles

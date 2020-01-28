@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 namespace AutoAction
 {
+	using Data = KSPe.IO.Data<AutoActionEditor>;
+
 	static class Static
 	{
-        public static readonly KSPe.IO.Data.ConfigNode SETTINGS_FILE = KSPe.IO.Data.ConfigNode.ForType<AutoActionEditor>("AutoAction", "AutoAction.settings");
+        public static readonly Data.ConfigNode SETTINGS_FILE = Data.ConfigNode.For("AutoAction", "AutoAction.settings");
 
 		// Conversion extension methods
 
