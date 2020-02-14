@@ -17,3 +17,4 @@ If (Test-Path $zipFile) {
 }
 
 Compress-Archive $srcDir $zipFile -Force
+
