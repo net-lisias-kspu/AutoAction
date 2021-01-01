@@ -13,5 +13,6 @@
   "resources"    : {
     "homepage"   : "http://forum.kerbalspaceprogram.com/index.php?/topic/150666-12-auto-actions-continued",
     "repository" : "https://github.com/formicant/AutoAction"
-  }
+  },
+  "tags"         : [ "plugin", "convenience" ]
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace AutoAction
@@ -13,8 +11,8 @@ namespace AutoAction
 			{
 				var agxType = Type.GetType(AgxTypeName);
 				return
-					agxType != null &&
-					(bool)agxType.InvokeMember("AGXInstalled", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, null);
+					agxType is object &&
+					(bool) agxType.InvokeMember("AGXInstalled", InvokePublicStaticMethod, null, null, null);
 			}
 			catch
 			{
@@ -27,11 +25,12 @@ namespace AutoAction
 			try
 			{
 				var agxType = Type.GetType(AgxTypeName);
-				agxType?.InvokeMember("AGXToggleGroup", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static, null, null, new object[] { group });
+				agxType?.InvokeMember("AGXToggleGroup", InvokePublicStaticMethod, null, null, new object[] { group });
 			}
 			catch { }
 		}
 
+		static readonly BindingFlags InvokePublicStaticMethod = BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Static;
 		const string AgxTypeName = "ActionGroupsExtended.AGExtExternal, AGExt";
 	}
 }

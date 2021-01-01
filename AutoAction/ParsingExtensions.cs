@@ -1,28 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using UnityEngine;
 
 namespace AutoAction
 {
-	static class Static
+	static class ParsingExtensions
 	{
-		static readonly string FullModFolderPath = KSPUtil.ApplicationRootPath + $"GameData/{nameof(AutoAction)}/";
-
-		public static readonly string TextureFolderPath = nameof(AutoAction) + "/Textures/";
-
-		public static readonly string SettingsFilePath = FullModFolderPath + $"Plugins/PluginData/{nameof(AutoAction)}.settings";
-
-
-		// Conversion extension methods
-
-		public static string ToStringValue(this float value) =>
-			value.ToString(CultureInfo.InvariantCulture);
-
 		public static string ToStringValue(this int value) =>
 			value.ToString(CultureInfo.InvariantCulture);
 
-		public static string ToStringValue(this int? nullableInt, string nullValue = "None") =>
+		public static string ToStringValue(this int? nullableInt, string nullValue = "") =>
 			nullableInt?.ToStringValue() ?? nullValue;
 
 		public static string ToStringSigned(this int value) =>
@@ -38,8 +26,11 @@ namespace AutoAction
 				? nullableBool.Value.ToStringValue(falseValue, trueValue)
 				: nullValue;
 
+		public static string ToStringValue(this int?[] array) =>
+			string.Join(",", array.Select(v => v.ToStringValue())).TrimEnd(',');
+
 		public static int? ParseNullableInt(this string text, int minValue = int.MinValue, int maxValue = int.MaxValue) =>
-			text != null
+			text is object
 				? int.TryParse(text.Replace("−", "-"), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)
 					? minValue <= value && value <= maxValue
 						? value
@@ -48,7 +39,7 @@ namespace AutoAction
 				: (int?)null;
 
 		public static bool? ParseNullableBool(this string text, bool invertedCompatibilityValue = false, string falseValue = "Off", string trueValue = "On") =>
-			text != null
+			text is object
 				? bool.TryParse(text, out bool compatibilityValue)
 					// Older version compatibility
 					? compatibilityValue
@@ -61,5 +52,21 @@ namespace AutoAction
 							? false
 							: (bool?)null
 				: (bool?)null;
+
+		public static Vector2? ParseNullableVector2(this string text)
+		{
+			var parts = text.Split(',');
+			return parts.Length == 2 && float.TryParse(parts[0].Trim(), out float x) && float.TryParse(parts[1].Trim(), out float y)
+				? new Vector2(x, y)
+				: (Vector2?) null;
+		}
+
+		public static int?[] ParseNullableIntArray(this string text, int count)
+		{
+			var values = text?.Split(',').Select(s => s.Trim().ParseNullableInt()).ToArray() ?? new int?[count];
+			return values.Length == count
+				? values
+				: values.Take(count).Concat(Enumerable.Repeat<int?>(null, Math.Max(0, count - values.Length))).ToArray();
+		}
 	}
 }
