@@ -16,25 +16,28 @@
 
 */
 using System;
+using UnityEngine;
 
 namespace AutoAction
 {
-	class ModuleAutoAction : PartModule
+	/// <summary>
+	/// Showing an empty window for a tiny moment to Initialize the legacy GUI.
+	/// </summary>
+	[KSPAddon(KSPAddon.Startup.MainMenu, once: true)]
+	public class AutoActionMainMenu : MonoBehaviour
 	{
-		public VesselSettings VesselSettings { get; set; }
-
-		public override void OnLoad(ConfigNode node)
+		public void OnGUI()
 		{
-			if(node.CountNodes > 0)  // not in prefab
+			if(_isFirstTime)
 			{
-				VesselSettings = new VesselSettings();
-				VesselSettings.Load(node);
+				Debug.Log($"[{nameof(AutoAction)}] mainMenu: OnGUI");
+				GUILayout.Window(WindowId, new Rect(), id => { }, " ");
+				_isFirstTime = false;
 			}
 		}
 
-		public override void OnSave(ConfigNode node)
-		{
-			VesselSettings?.Save(node);
-		}
+		bool _isFirstTime = true;
+
+		static readonly int WindowId = nameof(AutoAction).GetHashCode();
 	}
 }

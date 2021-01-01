@@ -55,8 +55,13 @@
   <ItemGroup>
     <Compile Include="AGXInterface.cs" />
     <Compile Include="AutoActionEditor.cs" />
+    <Compile Include="AutoActionMainMenu.cs" />
+    <Compile Include="ModuleExtensions.cs" />
+    <Compile Include="AutoActionEditor_GUI.cs" />
+    <Compile Include="VesselSettings.cs" />
     <Compile Include="AutoActionFlight.cs" />
     <Compile Include="ModuleAutoAction.cs" />
+    <Compile Include="FacilitySettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Static.cs" />
     <Compile Include="Properties\Version.cs">
@@ -71,6 +76,8 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Version.cs</LastGenOutput>
     </None>
+    <Compile Include="Settings.cs" />
+    <Compile Include="ParsingExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
