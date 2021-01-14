@@ -61,8 +61,10 @@ namespace AutoAction
 			// Loading settings
 			var facility = GetFacilitySettings();
 			var vessel = FlightGlobals.ActiveVessel.Parts.GetVesselSettings();
-
-			// TODO: Support action sets!
+			
+			// Selecting action set
+			if(vessel.ActionSet is int set)
+				FlightGlobals.ActiveVessel.SetGroupOverride(set);
 
 			// Activating standard action groups
 			var actionGroups = FlightGlobals.ActiveVessel.ActionGroups;
