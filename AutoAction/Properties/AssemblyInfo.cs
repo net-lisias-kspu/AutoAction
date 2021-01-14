@@ -28,7 +28,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.11.2.0")]
+[assembly: AssemblyVersion("1.11.3.0")]
 
 // Use KSPAssembly to allow other DLLs to make this DLL a dependency in a 
 // non-hacky way in KSP.  Format is (AssemblyProduct, major, minor), and it 

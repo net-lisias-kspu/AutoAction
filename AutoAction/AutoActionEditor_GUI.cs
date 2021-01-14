@@ -147,8 +147,8 @@ namespace AutoAction
 				DrawCustomAction(ref _vesselSettings.CustomGroupStrings[i]);
 			GUILayout.EndHorizontal();
 
-			// TODO: Support action sets!
-			//DrawActionSet(ref _vesselSettings.ActionSet);
+			// Action sets
+			DrawActionSet(ref _vesselSettings.ActionSet);
 			GUILayout.Space(3);
 
 			// Additional settings
