@@ -106,7 +106,7 @@ namespace AutoAction
 
 		void SetVesselSettingsFrom(IEnumerable<Part> parts)
 		{
-			_vesselSettings = parts?.GetVesselSettings() ?? new VesselSettings();
+			_vesselSettings = parts.GetVesselSettings();
 			_isTrimSectionExpanded = _vesselSettings.HasNonDefaultTrim;
 			_windowRectangle.height = 0;
 		}
