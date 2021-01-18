@@ -14,6 +14,7 @@ namespace AutoAction
 		{
 			Debug.Log($"[{nameof(AutoAction)}] flight: Start");
 			GameEvents.OnVesselRollout.Add(OnVesselRollout);
+			StartCoroutine(ActivateWhenReady());
 		}
 
 		public void OnDestroy()
@@ -25,25 +26,41 @@ namespace AutoAction
 		void OnVesselRollout(ShipConstruct _)
 		{
 			Debug.Log($"[{nameof(AutoAction)}] flight: OnVesselRollout");
+			_isRollout = true;
 			StartCoroutine(ActivateWhenReady());
 		}
+
+		bool _isRollout;
+		bool _hasTriggered;
 
 		IEnumerator<YieldInstruction> ActivateWhenReady()
 		{
 			var wait = new WaitForFixedUpdate();
-			while(FlightGlobals.ActiveVessel.HoldPhysics || FlightGlobals.ActiveVessel is null)
+			while(FlightGlobals.ActiveVessel is null || FlightGlobals.ActiveVessel.HoldPhysics)
 				yield return wait;
 
-			Activate();
+			if(!_hasTriggered)
+			{
+				var parts = FlightGlobals.ActiveVessel.Parts;
+				var hasActivated = parts.GetHasActivated();
+				var vesselSettings = parts.GetVesselSettings();
+				var isLanded = FlightGlobals.ActiveVessel.Landed;
+
+				if(_isRollout || isLanded && !hasActivated)
+				{
+					_hasTriggered = true;
+					parts.SetHasActivated();
+					Activate(vesselSettings);
+				}
+			}
 		}
 
-		void Activate()
+		void Activate(VesselSettings vessel)
 		{
 			Debug.Log($"[{nameof(AutoAction)}] flight: Activate");
 
-			// Loading settings
+			// Loading facility default settings
 			var facility = GetFacilitySettings();
-			var vessel = FlightGlobals.ActiveVessel.Parts.GetVesselSettings();
 			
 			// Selecting action set
 			if(vessel.ActionSet is int set)
