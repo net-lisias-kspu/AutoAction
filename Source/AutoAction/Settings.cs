@@ -31,11 +31,11 @@ namespace AutoAction
 		{
 			node.SetValue(nameof(WindowPosition), WindowPosition, true);
 
-			var vabNode = new ConfigNode();
+			ConfigNode vabNode = new ConfigNode();
 			VabSettings.Save(vabNode);
 			node.SetNode("VAB", vabNode, true);
 
-			var sphNode = new ConfigNode();
+			ConfigNode sphNode = new ConfigNode();
 			SphSettings.Save(sphNode);
 			node.SetNode("SPH", sphNode, true);
 		}
@@ -49,15 +49,14 @@ namespace AutoAction
 
 		public void Save()
 		{
-			ConfigNode node = new ConfigNode();
-			Save(node);
-			SETTINGS.Save(node);
+			this.Save(SETTINGS.Node);
+			SETTINGS.Save();
 		}
 
 		public void Load()
 		{
-			if(SETTINGS.IsLoadable) SETTINGS.Load();
-				Load(SETTINGS.Node);
+			if(SETTINGS.IsLoadable) SETTINGS.Load(); else { SETTINGS.Clear(); this.Save(); }
+			Load(SETTINGS.Node);
 		}
 
 		static readonly Vector2 DefaultWindowPosition = new Vector2(431, 25);

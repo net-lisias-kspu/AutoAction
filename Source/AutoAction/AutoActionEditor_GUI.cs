@@ -18,6 +18,7 @@
 using System;
 using KSP.Localization;
 using UnityEngine;
+using Asset = KSPe.IO.Asset<AutoAction.Startup>;
 
 namespace AutoAction
 {
@@ -32,10 +33,9 @@ namespace AutoAction
 		static readonly GUISkin Skin = HighLogic.Skin;
 		static readonly GUIStyle WindowStyle = new GUIStyle(Skin.window) { padding = new RectOffset(6, 8, 26, 8) };
 
-		static GUIStyle GetButtonStyle(string teaxtureName)
+		static GUIStyle GetButtonStyle(string texname)
 		{
-			var texturePath = $"{nameof(AutoAction)}/Textures/{teaxtureName}";
-			var texture = GameDatabase.Instance.GetTexture(texturePath, asNormalMap: false);
+			Texture2D texture = Asset.Texture2D.LoadFromFile("Textures", texname);
 			return new GUIStyle(Skin.button)
 			{
 				alignment = TextAnchor.MiddleCenter,
