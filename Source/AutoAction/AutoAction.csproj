@@ -62,8 +62,9 @@
     <Compile Include="Properties\Version.cs">
       <DependentUpon>Version.tt</DependentUpon>
     </Compile>
-    <Compile Include="Logging.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="Properties\LegalMamboJambo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Version.tt">

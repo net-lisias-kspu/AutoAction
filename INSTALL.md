@@ -1,6 +1,8 @@
-# Auto Actions /L Unofficial
+# Auto Action /L Unleashed
 
-KSP plugin for automatic action groups activation on launch. Unofficial fork by Lisias.
+KSP plugin for automatic action groups activation on launch.
+
+[Unleashed](https://ksp.lisias.net/add-ons-unleashed/) fork by Lisias.
 
 
 ## Installation Instructions
@@ -48,7 +50,7 @@ The following file layout must be present after installation:
 
 ### Dependencies
 
-* [KSP API Extensions/L](https://github.com/net-lisias-ksp/KSPAPIExtensions) 2.1 or later
+* [KSP API Extensions/L](https://github.com/net-lisias-ksp/KSPAPIExtensions) 2.4 or later
 	+ Hard Dependency - Plugin will not work without it.
 	+ Not Included
 

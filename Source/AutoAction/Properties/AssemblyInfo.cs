@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("AutoAction")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("KSP plugin for automatic action groups activation on launch.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("AutoAction")]
-[assembly: AssemblyCopyright("")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany(AutoAction.LegalMamboJambo.Company)]
+[assembly: AssemblyProduct(AutoAction.LegalMamboJambo.Product)]
+[assembly: AssemblyCopyright(AutoAction.LegalMamboJambo.Copyright)]
+[assembly: AssemblyTrademark(AutoAction.LegalMamboJambo.Trademark)]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -35,5 +35,4 @@ using System.Runtime.InteropServices;
 // non-hacky way in KSP.  Format is (AssemblyProduct, major, minor), and it 
 // does not appear to have a hard requirement to match the assembly version. 
 [assembly: KSPAssembly("AutoAction", AutoAction.Version.major, AutoAction.Version.minor)]
-
 [assembly: KSPAssemblyDependency("KSPe", 2, 1)]

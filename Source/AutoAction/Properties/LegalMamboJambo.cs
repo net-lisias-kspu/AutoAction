@@ -15,27 +15,13 @@
 	with Auto Actions /L Unleashed. If not, see <https://www.gnu.org/licenses/>.
 
 */
-using UnityEngine;
-
 namespace AutoAction
 {
-    [KSPAddon(KSPAddon.Startup.Instantly, true)]
-    internal class Startup : MonoBehaviour
+	public static class LegalMamboJambo
 	{
-        private void Start()
-        {
-            Log.force("Version {0}", Version.Text);
-
-            try
-            {
-                //KSPe.Util.Compatibility.Check<Startup>(typeof(Version), typeof(Configuration));
-                KSPe.Util.Installation.Check<Startup>(typeof(Version));
-            }
-            catch (KSPe.Util.InstallmentException e)
-            {
-                Log.err(e.ToShortMessage());
-                KSPe.Common.Dialogs.ShowStopperAlertBox.Show(e);
-            }
-        }
+		public const string Company = "/L Aerospace KSP Division";
+		public const string Copyright = "© 2018-2021 LisiasT";
+		public const string Product = "AutoAction";
+		public const string Trademark = "Auto Actions™ by Diazo; (Continued)™ by Formicant; /L Unleashed™ by LisiasT";
 	}
 }
