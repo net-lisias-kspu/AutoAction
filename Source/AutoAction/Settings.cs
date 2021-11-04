@@ -17,6 +17,7 @@
 */
 using System;
 using UnityEngine;
+using USERDATA = KSPe.IO.Data<AutoAction.Startup>;
 
 namespace AutoAction
 {
@@ -26,7 +27,7 @@ namespace AutoAction
 		public FacilitySettings VabSettings { get; } = new FacilitySettings();
 		public FacilitySettings SphSettings { get; } = new FacilitySettings();
 
-		public void Save(ConfigNode node)
+		private void Save(ConfigNode node)
 		{
 			node.SetValue(nameof(WindowPosition), WindowPosition, true);
 
@@ -39,7 +40,7 @@ namespace AutoAction
 			node.SetNode("SPH", sphNode, true);
 		}
 
-		public void Load(ConfigNode node)
+		private void Load(ConfigNode node)
 		{
 			VabSettings.Load(node.GetNode("VAB"));
 			SphSettings.Load(node.GetNode("SPH"));
@@ -48,19 +49,18 @@ namespace AutoAction
 
 		public void Save()
 		{
-			var node = new ConfigNode();
+			ConfigNode node = new ConfigNode();
 			Save(node);
-			node.Save(SettingsFilePath);
+			SETTINGS.Save(node);
 		}
 
 		public void Load()
 		{
-			var node = ConfigNode.Load(SettingsFilePath);
-			if(node is object)
-				Load(node);
+			if(SETTINGS.IsLoadable) SETTINGS.Load();
+				Load(SETTINGS.Node);
 		}
 
 		static readonly Vector2 DefaultWindowPosition = new Vector2(431, 25);
-		static readonly string SettingsFilePath = $"GameData/{nameof(AutoAction)}/Plugins/PluginData/{nameof(AutoAction)}.settings";
+		private static USERDATA.ConfigNode SETTINGS = USERDATA.ConfigNode.For("Settings");
 	}
 }
