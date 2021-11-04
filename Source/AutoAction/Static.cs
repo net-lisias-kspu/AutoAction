@@ -17,13 +17,24 @@
 */
 using System;
 using System.Globalization;
+using System.Reflection;
 
 namespace AutoAction
 {
 	using Data = KSPe.IO.Data<AutoActionEditor>;
 
-	static class Static
+	internal static class Static
 	{
-        public static readonly Data.ConfigNode SETTINGS_FILE = Data.ConfigNode.For("AutoAction", "AutoAction.settings");
+		internal static readonly Data.ConfigNode SETTINGS_FILE = Data.ConfigNode.For("AutoAction", "AutoAction.settings");
+
+		internal static class Vessel
+		{
+			internal static void SetGroupOverride(global::Vessel activeVessel, int set)
+			{
+				MethodInfo methodInfo = activeVessel.GetType().GetMethod("SetGroupOverride");
+				if(null != methodInfo)
+					methodInfo.Invoke(activeVessel, new object[] { set });
+			}
+		}
 	}
 }

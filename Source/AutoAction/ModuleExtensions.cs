@@ -37,7 +37,7 @@ namespace AutoAction
 			return vesselSettings ?? new VesselSettings();
 		}
 
-		public static void UpdateVesselSettings(this IReadOnlyList<Part> parts, VesselSettings vesselSettings)
+		public static void UpdateVesselSettings(this IList<Part> parts, VesselSettings vesselSettings)
 		{
 			Debug.Log($"[{nameof(AutoAction)}] UpdateVesselSettings");
 
@@ -50,7 +50,7 @@ namespace AutoAction
 			}
 		}
 
-		public static bool GetHasActivated(this IReadOnlyList<Part> parts)
+		public static bool GetHasActivated(this IList<Part> parts)
 		{
 			Debug.Log($"[{nameof(AutoAction)}] GetHasActivated");
 
@@ -61,7 +61,7 @@ namespace AutoAction
 			return modules.Count == 0 || modules.All(m => m.hasActivated);
 		}
 
-		public static void SetHasActivated(this IReadOnlyList<Part> parts)
+		public static void SetHasActivated(this IList<Part> parts)
 		{
 			Debug.Log($"[{nameof(AutoAction)}] SetHasActivated");
 

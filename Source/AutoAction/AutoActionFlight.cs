@@ -81,7 +81,7 @@ namespace AutoAction
 			
 			// Selecting action set
 			if(vessel.ActionSet is int set)
-				FlightGlobals.ActiveVessel.SetGroupOverride(set);
+				Static.Vessel.SetGroupOverride(FlightGlobals.ActiveVessel, set);
 
 			// Activating standard action groups
 			var actionGroups = FlightGlobals.ActiveVessel.ActionGroups;
