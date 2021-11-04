@@ -1,18 +1,18 @@
 {
-	"NAME"		: "AutoAction Unleashed",
+	"NAME"		: "AutoAction /L Unleashed",
 	"DOWNLOAD"	: "https://github.com/net-lisias-kspu/AutoAction/releases",
 	"URL"		: "https://github.com/net-lisias-kspu/AutoAction/AutoAction.version",
 	"CHANGE_LOG"	: "https://github.com/net-lisias-kspu/AutoAction/CHANGE_LOG.md",
 	"CHANGE_LOG_URL": "https://github.com/net-lisias-kspu/AutoAction/CHANGES.md",
 	"VERSION":{
 		"MAJOR":1,
-		"MINOR":11,
-		"PATCH":0,
-		"BUILD":1
+		"MINOR":12,
+		"PATCH":2,
+		"BUILD":0
 		},
 	"KSP_VERSION_MIN":{
 		"MAJOR":1,
-		"MINOR":4,
+		"MINOR":3,
 		"PATCH":1
 		}
 }
