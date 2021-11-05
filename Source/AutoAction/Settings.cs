@@ -18,6 +18,7 @@
 using System;
 using UnityEngine;
 using USERDATA = KSPe.IO.Data<AutoAction.Startup>;
+using SAVE = KSPe.IO.Save<AutoAction.Startup>;
 
 namespace AutoAction
 {
@@ -26,6 +27,7 @@ namespace AutoAction
 		public Vector2 WindowPosition { get; set; } = DefaultWindowPosition;
 		public FacilitySettings VabSettings { get; } = new FacilitySettings();
 		public FacilitySettings SphSettings { get; } = new FacilitySettings();
+		public bool UseSaveGameSettings { get; set; } = false;
 
 		private void Save(ConfigNode node)
 		{
@@ -38,6 +40,8 @@ namespace AutoAction
 			ConfigNode sphNode = new ConfigNode();
 			SphSettings.Save(sphNode);
 			node.SetNode("SPH", sphNode, true);
+
+			node.SetValue("UseSaveGameSettings", UseSaveGameSettings, true);
 		}
 
 		private void Load(ConfigNode node)
@@ -45,22 +49,46 @@ namespace AutoAction
 			VabSettings.Load(node.GetNode("VAB"));
 			SphSettings.Load(node.GetNode("SPH"));
 			WindowPosition = node.GetValue(nameof(WindowPosition))?.ParseNullableVector2() ?? DefaultWindowPosition;
+			{
+				bool b = false;
+				node.TryGetValue("UseSaveGameSettings", ref b);
+				UseSaveGameSettings = b;
+			}
 		}
 
 		public void Save()
 		{
-			this.Save(SETTINGS.Node);
-			SETTINGS.Save();
+			if(this.UseSaveGameSettings)
+			{
+				this.Save(SAVEGAME.Node);
+				SAVEGAME.Save();
+			}
+			else
+			{
+				this.Save(SETTINGS.Node);
+				SETTINGS.Save();
+			}
 		}
 
 		public void Load()
 		{
-			if(SETTINGS.IsLoadable) SETTINGS.Load(); else { SETTINGS.Clear(); this.Save(); }
+			if(SAVEGAME.IsLoadable)
+			{
+				SAVEGAME.Load();
+				Load(SAVEGAME.Node);
+				if(this.UseSaveGameSettings) return;
+			}
+			// If we get here, the SAVEGAME settings told us it's commiting suicide.
+			else if (SETTINGS.IsLoadable) SETTINGS.Load();
+			else { SETTINGS.Clear(); this.Save(); }
+
 			Load(SETTINGS.Node);
+			if(SAVEGAME.IsLoadable) SAVEGAME.Destroy();
 		}
 
 		static readonly Vector2 DefaultWindowPosition = new Vector2(431, 25);
 		private static USERDATA.ConfigNode SETTINGS = USERDATA.ConfigNode.For("Settings");
+		private static SAVE.ConfigNode SAVEGAME = SAVE.ConfigNode.For("Settings");
 
 		internal FacilitySettings For(EditorFacility shipType)
 		{

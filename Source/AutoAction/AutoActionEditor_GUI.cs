@@ -138,6 +138,10 @@ namespace AutoAction
 				GUILayout.EndVertical();
 				GUILayout.EndHorizontal();
 			}
+			GUILayout.Space(1);
+			GUILayout.BeginHorizontal();
+			DrawOnOffButton(ref _settings_UseSaveGameSettings, "#ModAutoAction_UseSaveGameSettings");
+			GUILayout.EndHorizontal();
 
 			GUI.DragWindow();
 		}

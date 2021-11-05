@@ -26,6 +26,7 @@ namespace AutoAction
 	public partial class AutoActionEditor : MonoBehaviour
 	{
 		Settings _settings;
+		bool _settings_UseSaveGameSettings;
 		FacilitySettings _facilitySettings;
 		VesselSettings _vesselSettings;
 
@@ -42,6 +43,7 @@ namespace AutoAction
 
 			_settings = new Settings();
 			_settings.Load();
+			_settings_UseSaveGameSettings = _settings.UseSaveGameSettings;
 
 			InitializeFacility();
 			SetVesselSettingsFrom(EditorLogic.SortedShipList);
@@ -61,7 +63,11 @@ namespace AutoAction
 			GameEvents.onEditorPodPicked.Remove(OnEditorPodPicked);
 			GameEvents.onEditorLoad.Remove(OnEditorLoad);
 
-			_settings?.Save();
+			if(null != _settings)
+			{
+				_settings.UseSaveGameSettings = _settings_UseSaveGameSettings;
+				_settings.Save();
+			}
 		}
 
 		void OnEditorRestart()
