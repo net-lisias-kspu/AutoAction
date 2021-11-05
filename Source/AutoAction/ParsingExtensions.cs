@@ -18,6 +18,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+
 using UnityEngine;
 
 namespace AutoAction
@@ -72,15 +73,15 @@ namespace AutoAction
 
 		public static Vector2? ParseNullableVector2(this string text)
 		{
-			var parts = text.Split(',');
+			string[] parts = text.Split(',');
 			return parts.Length == 2 && float.TryParse(parts[0].Trim(), out float x) && float.TryParse(parts[1].Trim(), out float y)
 				? new Vector2(x, y)
-				: (Vector2?) null;
+				: (Vector2?)null;
 		}
 
 		public static int?[] ParseNullableIntArray(this string text, int count)
 		{
-			var values = text?.Split(',').Select(s => s.Trim().ParseNullableInt()).ToArray() ?? new int?[count];
+			int?[] values = text?.Split(',').Select(s => s.Trim().ParseNullableInt()).ToArray() ?? new int?[count];
 			return values.Length == count
 				? values
 				: values.Take(count).Concat(Enumerable.Repeat<int?>(null, Math.Max(0, count - values.Length))).ToArray();

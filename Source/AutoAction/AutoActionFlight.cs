@@ -52,18 +52,18 @@ namespace AutoAction
 
 		IEnumerator<YieldInstruction> ActivateWhenReady()
 		{
-			var wait = new WaitForFixedUpdate();
-			while(FlightGlobals.ActiveVessel is null || FlightGlobals.ActiveVessel.HoldPhysics)
+			WaitForFixedUpdate wait = new WaitForFixedUpdate();
+			while (FlightGlobals.ActiveVessel is null || FlightGlobals.ActiveVessel.HoldPhysics)
 				yield return wait;
 
 			if(!_hasTriggered)
 			{
-				var parts = FlightGlobals.ActiveVessel.Parts;
-				var hasActivated = parts.GetHasActivated();
-				var vesselSettings = parts.GetVesselSettings();
-				var isLanded = FlightGlobals.ActiveVessel.Landed;
+				List<Part> parts = FlightGlobals.ActiveVessel.Parts;
+				bool hasActivated = parts.GetHasActivated();
+				VesselSettings vesselSettings = parts.GetVesselSettings();
+				bool isLanded = FlightGlobals.ActiveVessel.Landed;
 
-				if(_isRollout || isLanded && !hasActivated)
+				if (_isRollout || isLanded && !hasActivated)
 				{
 					_hasTriggered = true;
 					parts.SetHasActivated();
@@ -77,14 +77,14 @@ namespace AutoAction
 			Debug.Log($"[{nameof(AutoAction)}] flight: Activate");
 
 			// Loading facility default settings
-			var facility = GetFacilitySettings();
-			
+			FacilitySettings facility = GetFacilitySettings();
+
 			// Selecting action set
-			if(vessel.ActionSet is int set)
+			if (vessel.ActionSet is int set)
 				Static.Vessel.SetGroupOverride(FlightGlobals.ActiveVessel, set);
 
-			// Activating standard action groups
-			var actionGroups = FlightGlobals.ActiveVessel.ActionGroups;
+            // Activating standard action groups
+            ActionGroupList actionGroups = FlightGlobals.ActiveVessel.ActionGroups;
 			actionGroups.SetGroup(KSPActionGroup.SAS,    vessel.ActivateSAS    ?? facility.ActivateSAS   );
 			actionGroups.SetGroup(KSPActionGroup.RCS,    vessel.ActivateRCS    ?? facility.ActivateRCS   );
 			actionGroups.SetGroup(KSPActionGroup.Brakes, vessel.ActivateBrakes ?? facility.ActivateBrakes);
@@ -94,7 +94,7 @@ namespace AutoAction
 			SetAutoInitializingGroup(KSPActionGroup.Light, vessel.ActivateLights);
 
 			// Activating custom action groups
-			foreach(var customGroup in vessel.CustomGroups.OfType<int>())
+			foreach(int customGroup in vessel.CustomGroups.OfType<int>())
 				ActivateCustomActionGroup(customGroup);
 
 			// Setting precision control
@@ -130,9 +130,9 @@ namespace AutoAction
 			FlightInputHandler.fetch.precisionMode = precisionMode;
 
 			// Changing the gauge color
-			var gauges = FindObjectOfType<KSP.UI.Screens.Flight.LinearControlGauges>();
+			KSP.UI.Screens.Flight.LinearControlGauges gauges = FindObjectOfType<KSP.UI.Screens.Flight.LinearControlGauges>();
 			if(gauges is object)
-				foreach(var image in gauges.inputGaugeImages)
+				foreach(UnityEngine.UI.Image image in gauges.inputGaugeImages)
 					image.color = precisionMode
 						? XKCDColors.BrightCyan
 						: XKCDColors.Orange;
@@ -153,9 +153,9 @@ namespace AutoAction
 
 		static FacilitySettings GetFacilitySettings()
 		{
-			var settings = new Settings();
+			Settings settings = new Settings();
 			settings.Load();
-			var isVab = ShipConstruction.ShipType == EditorFacility.VAB;
+			bool isVab = ShipConstruction.ShipType == EditorFacility.VAB;
 			return isVab ? settings.VabSettings : settings.SphSettings;
 		}
 

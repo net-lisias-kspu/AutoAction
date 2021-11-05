@@ -305,9 +305,9 @@ namespace AutoAction
 
 		void DrawNumericField(ref string value, GUILayoutOption size, int maxLength, int minValue = int.MinValue, int maxValue = int.MaxValue)
 		{
-			var style = value.ParseNullableInt(minValue, maxValue).HasValue ? NumericFieldStyle : InvalidFieldStyle;
-			var newValue = GUILayout.TextField(value ?? "", maxLength, style, size);
-			if(newValue != value)
+			GUIStyle style = value.ParseNullableInt(minValue, maxValue).HasValue ? NumericFieldStyle : InvalidFieldStyle;
+			string newValue = GUILayout.TextField(value ?? "", maxLength, style, size);
+			if (newValue != value)
 			{
 				value = newValue;
 				UpdateVesselSettings();

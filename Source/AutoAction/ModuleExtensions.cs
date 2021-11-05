@@ -15,9 +15,9 @@
 	with Auto Actions /L Unleashed. If not, see <https://www.gnu.org/licenses/>.
 
 */
-using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
 namespace AutoAction
@@ -28,7 +28,7 @@ namespace AutoAction
 		{
 			Debug.Log($"[{nameof(AutoAction)}] GetVesselSettings");
 
-			var vesselSettings = parts
+			VesselSettings vesselSettings = parts
 				?.SelectMany(part => part.Modules.OfType<ModuleAutoAction>())
 				.Select(module => module.VesselSettings)
 				.OfType<VesselSettings>()
@@ -41,7 +41,7 @@ namespace AutoAction
 		{
 			Debug.Log($"[{nameof(AutoAction)}] UpdateVesselSettings");
 
-			foreach(var module in parts.GetOrAddAutoActionModules())
+			foreach (ModuleAutoAction module in parts.GetOrAddAutoActionModules())
 			{
 				module.hasActivated = false;
 				// Storing settings in the first module only
@@ -54,7 +54,7 @@ namespace AutoAction
 		{
 			Debug.Log($"[{nameof(AutoAction)}] GetHasActivated");
 
-			var modules = parts
+			List<ModuleAutoAction> modules = parts
 				.SelectMany(part => part.Modules.OfType<ModuleAutoAction>())
 				.ToList();
 
@@ -65,17 +65,17 @@ namespace AutoAction
 		{
 			Debug.Log($"[{nameof(AutoAction)}] SetHasActivated");
 
-			foreach(var module in parts.GetOrAddAutoActionModules())
+			foreach (ModuleAutoAction module in parts.GetOrAddAutoActionModules())
 				module.hasActivated = true;
 		}
 
 		static IEnumerable<ModuleAutoAction> GetOrAddAutoActionModules(this IEnumerable<Part> parts)
 		{
-			var commandParts = parts.Where(p =>
+			IEnumerable<Part> commandParts = parts.Where(p =>
 				p.Modules.OfType<ModuleCommand>().Any() ||
 				p.Modules.OfType<KerbalSeat>().Any());
 
-			foreach(var part in commandParts)
+			foreach (Part part in commandParts)
 				yield return
 					part.Modules.OfType<ModuleAutoAction>().FirstOrDefault() ??
 					part.AddModule(nameof(ModuleAutoAction)) as ModuleAutoAction;

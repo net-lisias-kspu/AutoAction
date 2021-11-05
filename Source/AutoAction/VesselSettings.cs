@@ -116,8 +116,8 @@ namespace AutoAction
 			SetThrottle    = node.GetValue(nameof(SetThrottle   )).ParseNullableInt(minValue: 0, maxValue: 100);
 			ActionSet      = node.GetValue(nameof(ActionSet     )).ParseNullableInt(minValue: 1, maxValue: 4);
 
-			var customGroups = node.GetValue(nameof(CustomGroups)).ParseNullableIntArray(CustomGroupCount);
-			for(int i = 0; i < CustomGroupCount; i++) // Older version compatibility
+			int?[] customGroups = node.GetValue(nameof(CustomGroups)).ParseNullableIntArray(CustomGroupCount);
+			for (int i = 0; i < CustomGroupCount; i++) // Older version compatibility
 				if(customGroups[i] is null)
 					customGroups[i] = node.GetValue("ActivateGroup" + (char) ('A' + i)).ParseNullableInt(minValue: 1, maxValue: 999);
 			CustomGroups = customGroups;
