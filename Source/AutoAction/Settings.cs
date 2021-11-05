@@ -61,5 +61,15 @@ namespace AutoAction
 
 		static readonly Vector2 DefaultWindowPosition = new Vector2(431, 25);
 		private static USERDATA.ConfigNode SETTINGS = USERDATA.ConfigNode.For("Settings");
+
+		internal FacilitySettings For(EditorFacility shipType)
+		{
+			switch (shipType)
+			{
+				case EditorFacility.SPH: return this.SphSettings;
+				case EditorFacility.VAB: return this.VabSettings;
+				default: return new FacilitySettings();
+			}
+		}
 	}
 }
