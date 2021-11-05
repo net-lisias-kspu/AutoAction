@@ -45,5 +45,15 @@ namespace AutoAction
 
 		static readonly Vector2 DefaultWindowPosition = new Vector2(431, 25);
 		static readonly string SettingsFilePath = $"GameData/{nameof(AutoAction)}/Plugins/PluginData/{nameof(AutoAction)}.settings";
+
+		internal FacilitySettings For(EditorFacility shipType)
+		{
+			switch (shipType)
+			{
+				case EditorFacility.SPH: return this.SphSettings;
+				case EditorFacility.VAB: return this.VabSettings;
+				default: return new FacilitySettings();
+			}
+		}
 	}
 }

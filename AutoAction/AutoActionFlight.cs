@@ -136,10 +136,9 @@ namespace AutoAction
 
 		static FacilitySettings GetFacilitySettings()
 		{
-			var settings = new Settings();
+			Settings settings = new Settings();
 			settings.Load();
-			var isVab = ShipConstruction.ShipType == EditorFacility.VAB;
-			return isVab ? settings.VabSettings : settings.SphSettings;
+			return settings.For(ShipConstruction.ShipType);
 		}
 
 		static readonly IDictionary<int, KSPActionGroup> KspActions = new Dictionary<int, KSPActionGroup>
