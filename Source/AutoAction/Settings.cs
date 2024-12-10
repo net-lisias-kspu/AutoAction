@@ -87,8 +87,13 @@ namespace AutoAction
 		}
 
 		static readonly Vector2 DefaultWindowPosition = new Vector2(431, 25);
-		private static USERDATA.ConfigNode SETTINGS = USERDATA.ConfigNode.For("Settings");
-		private static SAVE.ConfigNode SAVEGAME = SAVE.ConfigNode.For("Settings");
+		private static readonly USERDATA.ConfigNode SETTINGS = USERDATA.ConfigNode.For("Settings");
+
+		// Since it's impossible to enter any Editor without having the SaveGame fully loaded,
+		// there's no risk on doing things here on the static land.
+		//
+		// But don't try this on anything that could be loaded before KSP fully populate the HighLogic.fetch.GameSaveFolder!
+		private static readonly SAVE.ConfigNode SAVEGAME = SAVE.ConfigNode.For("Settings");
 
 		internal FacilitySettings For(EditorFacility shipType)
 		{
