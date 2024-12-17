@@ -1,6 +1,6 @@
 ﻿/*
 	This file is part of Auto Actions /L Unleashed
-		© 2021 Lisias T : http://lisias.net <support@lisias.net>
+		© 2018-2024 LisiasT : http://lisias.net <support@lisias.net>
 		© 2016-2018 Teilnehmer(Formicant)
 		© 2014-2016 Diazo
 
