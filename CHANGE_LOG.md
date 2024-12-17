@@ -1,5 +1,8 @@
 # Auto Actions /L Unleashed :: Change Log
 
+* 2024-1217: 1.12.2.1 (lisias) for  KSP >= 1.3.1
+	+ Update to cope with the new `KSPe.IO.Save<T>` semantics from KSPe 2.5.5.0
+		- 2.5.5.0 is the new minimum.  
 * 2021-1105: 1.12.2.0 (lisias) for KSP >= 1.3.1
 	+ Updated to the most recent KSPe API and facilities (v2.4)
 	+ Lowering the bar to KSP 1.3.1!! **#HURRAY!!**
